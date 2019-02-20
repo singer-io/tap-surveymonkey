@@ -1,0 +1,741 @@
+{
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "$ref": "#/definitions/Survey",
+    "definitions": {
+        "Survey": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "quiz_options": {
+                    "$ref": "#/definitions/SurveyQuizOptions"
+                },
+                "response_count": {
+                    "type": "integer"
+                },
+                "page_count": {
+                    "type": "integer"
+                },
+                "date_created": {
+                    "type": "string"
+                },
+                "buttons_text": {
+                    "$ref": "#/definitions/ButtonsText"
+                },
+                "folder_id": {
+                    "type": "string"
+                },
+                "custom_variables": {
+                    "type": "object"
+                },
+                "nickname": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "question_count": {
+                    "type": "integer"
+                },
+                "category": {
+                    "type": "string"
+                },
+                "preview": {
+                    "type": "string"
+                },
+                "is_owner": {
+                    "type": "boolean"
+                },
+                "language": {
+                    "type": "string"
+                },
+                "footer": {
+                    "type": "boolean"
+                },
+                "date_modified": {
+                    "type": "string"
+                },
+                "analyze_url": {
+                    "type": "string"
+                },
+                "summary_url": {
+                    "type": "string"
+                },
+                "href": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "collect_url": {
+                    "type": "string"
+                },
+                "edit_url": {
+                    "type": "string"
+                },
+                "pages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Page"
+                    }
+                }
+            },
+            "required": [
+                "analyze_url",
+                "buttons_text",
+                "category",
+                "collect_url",
+                "custom_variables",
+                "date_created",
+                "date_modified",
+                "edit_url",
+                "folder_id",
+                "footer",
+                "href",
+                "id",
+                "is_owner",
+                "language",
+                "nickname",
+                "page_count",
+                "pages",
+                "preview",
+                "question_count",
+                "response_count",
+                "summary_url",
+                "title"
+            ],
+            "title": "Survey"
+        },
+        "ButtonsText": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "done_button": {
+                    "type": "string"
+                },
+                "prev_button": {
+                    "type": "string"
+                },
+                "exit_button": {
+                    "type": "string"
+                },
+                "next_button": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "done_button",
+                "exit_button",
+                "next_button",
+                "prev_button"
+            ],
+            "title": "ButtonsText"
+        },
+        "Page": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "href": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "questions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Question"
+                    }
+                },
+                "title": {
+                    "type": "string"
+                },
+                "position": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "question_count": {
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "description",
+                "href",
+                "id",
+                "position",
+                "question_count",
+                "questions",
+                "title"
+            ],
+            "title": "Page"
+        },
+        "Question": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "quiz_options": {
+                    "type": "object",
+                    "properties": {
+                        "scoring_enabled": {"type": "boolean"},
+                        "feedback":{
+                            "type": "object",
+                            "properties": {
+                                "correct_text": {
+                                    "type":"string"
+                                },
+                                "incorrect_text": {
+                                    "type":"string"
+                                },
+                                "partial_text": {
+                                    "type":"string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "sorting": {
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/Sorting"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "family": {
+                    "type": "string"
+                },
+                "subtype": {
+                    "type": "string"
+                },
+                "required": {
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/Required"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "answers": {
+                    "$ref": "#/definitions/Answers"
+                },
+                "visible": {
+                    "type": "boolean"
+                },
+                "href": {
+                    "type": "string"
+                },
+                "headings": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Heading"
+                    }
+                },
+                "position": {
+                    "type": "integer"
+                },
+                "validation": {
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/Validation"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "id": {
+                    "type": "string"
+                },
+                "forced_ranking": {
+                    "type": "boolean"
+                },
+                "display_options": {
+                    "$ref": "#/definitions/DisplayOptions"
+                }
+            },
+            "required": [
+                "family",
+                "forced_ranking",
+                "headings",
+                "href",
+                "id",
+                "position",
+                "required",
+                "sorting",
+                "subtype",
+                "validation",
+                "visible"
+            ],
+            "title": "Question"
+        },
+        "Answers": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "other": {
+                    "$ref": "#/definitions/Other"
+                },
+                "choices": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Choice"
+                    }
+                },
+                "rows": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Row"
+                    }
+                },
+                "cols": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Col"
+                    }
+                }
+            },
+            "required": [],
+            "title": "Answers"
+        },
+        "Choice": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "quiz_options": {
+                    "$ref": "#/definitions/ChoiceQuizOptions"
+                },
+                "visible": {
+                    "type": "boolean"
+                },
+                "text": {
+                    "type": "string"
+                },
+                "position": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "description": {
+                    "$ref": "#/definitions/Description"
+                },
+                "weight": {
+                    "type": "integer"
+                },
+                "is_na": {
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "id",
+                "position",
+                "text",
+                "visible"
+            ],
+            "title": "Choice"
+        },
+        "ChoiceQuizOptions": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "score": {
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "score"
+            ],
+            "title": "ChoiceQuizOptions"
+        },
+        "ColChoices": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "visible": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
+                },
+                "position": {
+                    "type": "integer"
+                },
+                "is_na": {
+                    "type": "boolean"
+                }
+            },
+            "title": "ColChoices"
+        },
+        "Col": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "visible": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
+                },
+                "position": {
+                    "type": "integer"
+                },
+                "choices": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ColChoices"
+                    }
+                },
+                "is_na": {
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "id",
+                "position",
+                "text",
+                "visible"
+            ],
+            "title": "Col"
+        },
+        "Other": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "visible": {
+                    "type": "boolean"
+                },
+                "is_answer_choice": {
+                    "type": "boolean"
+                },
+                "apply_all_rows": {
+                    "type": "boolean"
+                },
+                "text": {
+                    "type": "string"
+                },
+                "position": {
+                    "type": "integer"
+                },
+                "num_chars": {
+                    "type": "integer"
+                },
+                "error_text": {
+                    "type": "string"
+                },
+                "num_lines": {
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "apply_all_rows",
+                "error_text",
+                "id",
+                "is_answer_choice",
+                "num_chars",
+                "num_lines",
+                "position",
+                "text",
+                "visible"
+            ],
+            "title": "Other"
+        },
+        "Row": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "visible": {
+                    "type": "boolean"
+                },
+                "text": {
+                    "type": "string"
+                },
+                "position": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "required": {
+                    "type": "boolean"
+                },
+                "type": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id",
+                "position",
+                "text",
+                "visible"
+            ],
+            "title": "Row"
+        },
+        "DisplayOptions": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+                "show_display_number": {
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "show_display_number"
+            ],
+            "title": "DisplayOptions"
+        },
+        "Heading": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "heading": {
+                    "type": "string"
+                },
+                "random_assignment": {
+                    "$ref": "#/definitions/RandomAssignment"
+                },
+                "image": {
+                    "$ref": "#/definitions/Image"
+                },
+                "description": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "heading"
+            ],
+            "title": "Heading"
+        },
+        "Image": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "url": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "url"
+            ],
+            "title": "Image"
+        },
+        "RandomAssignment": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "position": {
+                    "type": "integer"
+                },
+                "percent": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "variable_name": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id",
+                "percent",
+                "position",
+                "variable_name"
+            ],
+            "title": "RandomAssignment"
+        },
+        "Required": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "text": {
+                    "type": "string"
+                },
+                "amount": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "type": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "amount",
+                "text",
+                "type"
+            ],
+            "title": "Required"
+        },
+        "Sorting": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "type": {
+                    "type": "string"
+                },
+                "ignore_last": {
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "ignore_last",
+                "type"
+            ],
+            "title": "Sorting"
+        },
+        "Validation": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "sum_text": {
+                    "type": "string"
+                },
+                "min": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "text": {
+                    "type": "string"
+                },
+                "sum": {
+                    "oneOf": [
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "max": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "type": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "max",
+                "min",
+                "sum",
+                "sum_text",
+                "text",
+                "type"
+            ],
+            "title": "Validation"
+        },
+        "SurveyQuizOptions": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "show_results_type": {
+                    "type": "string"
+                },
+                "is_quiz_mode": {
+                    "type": "boolean"
+                },
+                "feedback": {
+                    "$ref": "#/definitions/Feedback"
+                }
+            },
+            "required": [
+                "feedback",
+                "is_quiz_mode",
+                "show_results_type"
+            ],
+            "title": "SurveyQuizOptions"
+        },
+        "Feedback": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "ranges": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Range"
+                    }
+                },
+                "ranges_type": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "ranges",
+                "ranges_type"
+            ],
+            "title": "Feedback"
+        },
+        "Range": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "max": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "min": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "max",
+                "message",
+                "min"
+            ],
+            "title": "Range"
+        },
+        "Description": {
+            "type": "string",
+            "enum": [
+                "",
+                "Not at all likely",
+                "Extremely likely"
+            ],
+            "title": "Description"
+        }
+    }
+}
