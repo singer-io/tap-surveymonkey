@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-from tap_surveymonkey.data import SurveyMonkey
-from tap_surveymonkey.mode import sync, discover
 import json
 import singer
+from tap_surveymonkey.data import SurveyMonkey
+from tap_surveymonkey.mode import sync, discover
+
 
 REQUIRED_CONFIG_KEYS = ["start_date", "access_token"]
 LOGGER = singer.get_logger()

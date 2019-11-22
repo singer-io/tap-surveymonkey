@@ -25,7 +25,7 @@ The [surveys](https://developer.surveymonkey.com/api/v3/#surveys-id-details) and
 The Simplified Responses resource will pull a Response schema, with an extra key `simple_text` embedded in each of the `answer` dictionaries,
 which is a human-readable form of the survey respondent's response to question. It also contains the `family`, `subtype`, and `heading` keys in the `question` object, for easy reference.
 
-# To run this tap
+# Quick Start
 
 1.  Install
 
@@ -45,7 +45,7 @@ which is a human-readable form of the survey respondent's response to question. 
 
 2.  Create a SurveyMonkey access token
 
-    Login to your SurveyMonkey account, go to [developer.surveymonkey.com/apps](developer.surveymonkey.com/apps), and create a new app (`private` if you aren't sure what to pick), with the scopes you require (for complete functionality of this tap, you'll need `View Surveys`, `View Responses`, `View Response Details`)
+    Login to your SurveyMonkey account, go to [developer.surveymonkey.com/apps](developer.surveymonkey.com/apps), and create a new app (`private` if you aren't sure what to pick), with the scopes you require (for complete functionality of this tap, you'll need `View Surveys`, `View Responses`, `View Response Details`).
 
     You can then get an access token from the `Settings` page of your newly created app.
 
@@ -53,17 +53,17 @@ which is a human-readable form of the survey respondent's response to question. 
 
     An example config file is provided in `sample_config.json`, the access token and survey in that file are invalid, and will error out. Replace them with your own valid ones.
 
-    `survey_id` is required only for the `responses` and `simplified_responses` streams. It can be acquired either by running the tap with the `survey_details` stream, or by using the `/v3/surveys` endpoint on the [SurveyMonkey API(https://developer.surveymonkey.com/api/v3/#surveys)].
+    `survey_id` is required only for the `responses` and `simplified_responses` streams. It can be acquired either by running the tap with the `survey_details` stream, or by using the `/v3/surveys` endpoint on the [SurveyMonkey API](https://developer.surveymonkey.com/api/v3/#surveys).
 
-4.  Run the tap in discovery mode to get properties.json file
+4.  Run the tap in discovery mode to get catalog.json file.
 
 ```
         tap-surveymonkey --config config.json --discover > catalog.json
 ```
 
-5.  In the catalog.json file, select the streams to sync
+5.  In the generated `catalog.json` file, select the streams to sync.
 
-    Each stream in the `catalog.json` file has a `schema` entry. To select a stream to sync, **add "selected": true** to that stream's `schema` entry. For example, to sync the pull_requests stream:
+    Each stream in the `catalog.json` file has a `schema` entry. To select a stream to sync, add **"selected": true** to that stream's `schema` entry. For example, to sync the survey_details stream:
 
 ```
         "tap_stream_id": "survey_details",
@@ -82,6 +82,26 @@ which is a human-readable form of the survey respondent's response to question. 
 
 ```
         tap-surveymonkey --config config.json --catalog catalog.json
+```
+
+7. To run with [Stitch Import API](https://www.stitchdata.com/docs/integrations/import-api/) with dry run:
+
+```
+        tap-surveymonkey --config config.json --catalog catalog.json | target-stitch --config target_config.json --dry-run > state.json
+```
+
+## Developing
+
+While developing the tap, run pylint to improve better code quality which is recommended by [Singer.io best practices](https://github.com/singer-io/getting-started/blob/master/docs/BEST_PRACTICES.md).
+
+```
+pylint tap_surveymonkey -d missing-docstring -d logging-format-interpolation -d too-many-locals -d too-many-arguments
+```
+
+To check the tap and verify working, install [singer-tools](https://github.com/singer-io/singer-tools).
+
+```
+tap-surveymonkey --config tap_config.json --catalog catalog.json | singer-check-tap
 ```
 
 ---

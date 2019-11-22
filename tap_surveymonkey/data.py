@@ -1,5 +1,5 @@
-import requests
 import time
+import requests
 import singer
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -7,11 +7,11 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 LOGGER = singer.get_logger()
 
 
-class SurveyMonkey(object):
+class SurveyMonkey:
     def __init__(self, access_token):
         self.access_token = access_token
 
-    def make_request(self, endpoint, method='GET', state={}, **request_kwargs):
+    def make_request(self, endpoint, state=None, method='GET', **request_kwargs):
         headers = {
             'Authorization': 'bearer %s' % self.access_token,
             'Content-Type': 'application/json'
@@ -26,8 +26,9 @@ class SurveyMonkey(object):
             day_reset = int(resp.headers['X-Ratelimit-App-Global-Day-Reset'])
             day_reset += 2
             LOGGER.info(
-                'Sleeping for %s seconds due to SurveyMonkey API rate limit... printing state' % day_reset)
-            singer.write_state(state)
+                'Sleeping for %d seconds due to SurveyMonkey API rate limit... printing state', day_reset)
+            if state:
+                singer.write_state(state)
             time.sleep(day_reset)
             resp = requests.request(method, url, headers=headers, **request_kwargs)
 
@@ -36,8 +37,9 @@ class SurveyMonkey(object):
             minute_reset = int(resp.headers['X-Ratelimit-App-Global-Minute-Reset'])
             minute_reset += 2
             LOGGER.info(
-                'Sleeping for %s seconds due to SurveyMonkey API rate limit... printing state' % minute_reset)
-            singer.write_state(state)
+                'Sleeping for %d seconds due to SurveyMonkey API rate limit... printing state', minute_reset)
+            if state:
+                singer.write_state(state)
             time.sleep(minute_reset)
             resp = requests.request(method, url, headers=headers, **request_kwargs)
 

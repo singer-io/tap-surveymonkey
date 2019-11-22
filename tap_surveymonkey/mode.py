@@ -1,9 +1,8 @@
-from tap_surveymonkey.schema import get_schemas, STREAMS
-from tap_surveymonkey.data import SurveyMonkey
-import singer
-import time
 import datetime
 import pytz
+import singer
+from tap_surveymonkey.schema import get_schemas, STREAMS
+from tap_surveymonkey.data import SurveyMonkey
 
 DATETIME_PARSE = "%Y-%m-%dT%H:%M:%SZ"
 DATETIME_FMT = "%04Y-%m-%dT%H:%M:%S.%fZ"
@@ -48,22 +47,17 @@ def sync(config, state, catalog):
     # Loop over streams in catalog
     for stream in catalog['streams']:
         stream_id = stream['tap_stream_id']
-        stream_schema = stream['schema']
-        mdata = stream.get('metadata')
         if stream_id in selected_stream_ids:
             sync_func = SYNC_FUNCTIONS[stream_id]
-            s_test = stream['schema']
-
             singer.write_schema(stream_id, stream['schema'], ['id'])
 
             state = sync_func(
-                stream_schema,
                 config,
-                state,
-                mdata)
-            LOGGER.info('Syncing stream:' + stream_id)
-    singer.write_state(state)
-    return
+                state
+            )
+            if state:
+                LOGGER.info('Syncing stream: {}'.format(stream_id))
+                singer.write_state(state)
 
 
 def strptime(dtime):
@@ -78,7 +72,7 @@ def strptime(dtime):
 
 def find_max_timestamp(state, stream_id):
     max_time = pytz.utc.localize(datetime.datetime.min)
-    for response_id, last_modified in state['bookmarks'].get(stream_id, {}).items():
+    for _, last_modified in state['bookmarks'].get(stream_id, {}).items():
         if max_time < pytz.utc.localize(strptime(last_modified)):
             max_time = pytz.utc.localize(strptime(last_modified))
     return max_time
@@ -116,7 +110,7 @@ def patch_time_str(obj_dict):
         obj_dict['date_created'] = time_str
 
 
-def sync_survey_details(schema, config, state, mdata):
+def sync_survey_details(config, state):
     stream_id = 'survey_details'
     access_token = config['access_token']
     sm_client = SurveyMonkey(access_token)
@@ -129,7 +123,7 @@ def sync_survey_details(schema, config, state, mdata):
     while True:
         if surveys.get('error'):
             LOGGER.critical(surveys)
-            return
+            return None
         for survey in surveys['data']:
             survey_modified = datetime.datetime.strptime(survey['date_modified'], SM_DATE_FORMAT)
             survey_modified = pytz.utc.localize(survey_modified)
@@ -156,7 +150,7 @@ def sync_survey_details(schema, config, state, mdata):
         surveys = sm_client.make_request('surveys', params=params)
 
     max_time = pytz.utc.localize(datetime.datetime.min)
-    for survey_id, last_modified in state['bookmarks'].get(stream_id, {}).items():
+    for _, last_modified in state['bookmarks'].get(stream_id, {}).items():
         if max_time < pytz.utc.localize(strptime(last_modified)):
             max_time = pytz.utc.localize(strptime(last_modified))
 
@@ -167,7 +161,7 @@ def sync_survey_details(schema, config, state, mdata):
     return state
 
 
-def sync_responses(schema, config, state, mdata, simplify=False):
+def sync_responses(config, state, simplify=False):
     survey_id = config['survey_id']
     stream_id = 'simplified_responses' if simplify else 'responses'
     access_token = config['access_token']
@@ -196,10 +190,10 @@ def sync_responses(schema, config, state, mdata, simplify=False):
     while True:
         if responses.get('error'):
             LOGGER.critical(responses)
-            return
+            return None
         for response in responses['data']:
             date_modified = response['date_modified']
-            if ":" == date_modified[-3:-2]:
+            if date_modified[-3:-2] == ":":
                 date_modified = date_modified[:-3] + date_modified[-2:]
             response_modified = datetime.datetime.strptime(date_modified, SM_RESPONSE_DATE_FORMAT)
             response_modified_str = singer.utils.strftime(response_modified)
@@ -235,8 +229,8 @@ def sync_responses(schema, config, state, mdata, simplify=False):
     return state
 
 
-def sync_simplified_responses(schema, config, state, mdata, **kwargs):
-    return sync_responses(schema, config, state, mdata, simplify=True)
+def sync_simplified_responses(config, state):
+    return sync_responses(config, state, simplify=True)
 
 
 SYNC_FUNCTIONS = {
