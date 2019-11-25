@@ -31,17 +31,17 @@ which is a human-readable form of the survey respondent's response to question. 
 
     Clone this repo
 
-```
-        git clone ...
-```
+    ```
+    git clone ...
+    ```
 
     We recommend using a virtualenv:
 
-```
-        virtualenv -p python3 venv
-        source venv/bin/activate
-        pip3 install -e .
-```
+    ```
+    virtualenv -p python3 venv
+    source venv/bin/activate
+    pip3 install -e .
+    ```
 
 2.  Create a SurveyMonkey access token
 
@@ -57,38 +57,61 @@ which is a human-readable form of the survey respondent's response to question. 
 
 4.  Run the tap in discovery mode to get catalog.json file.
 
-```
-        tap-surveymonkey --config config.json --discover > catalog.json
-```
+    ```
+    tap-surveymonkey --config config.json --discover > catalog.json
+    ```
 
 5.  In the generated `catalog.json` file, select the streams to sync.
 
     Each stream in the `catalog.json` file has a `schema` entry. To select a stream to sync, add **"selected": true** to that stream's `schema` entry. For example, to sync the survey_details stream:
 
-```
-        "tap_stream_id": "survey_details",
-            "schema": {
-        	    "selected": true,
-                "properties": {
-
-        ...
+    ```
+    "tap_stream_id": "survey_details",
+        "schema": {
+            "selected": true,
+            "properties": {
+                ...
+            }
         }
-        ...
-```
+    ...
+    ```
 
 6.  Run the application
 
     tap-surveymonkey can be run with:
 
-```
-        tap-surveymonkey --config config.json --catalog catalog.json
-```
+    ```
+    tap-surveymonkey --config config.json --catalog catalog.json
+    ```
 
-7. To run with [Stitch Import API](https://www.stitchdata.com/docs/integrations/import-api/) with dry run:
+7.  To run with [Stitch Import API](https://www.stitchdata.com/docs/integrations/import-api/) with dry run:
 
-```
-        tap-surveymonkey --config config.json --catalog catalog.json | target-stitch --config target_config.json --dry-run > state.json
-```
+    ```
+    tap-surveymonkey --config config.json --catalog catalog.json | target-stitch --config target_config.json --dry-run > state.json
+    ```
+
+## Streams
+
+### survey_details
+
+-   Endpoint: https://api.surveymonkey.com/v3/surveys/[survey_id]/detail
+-   Primary keys: id
+-   Replication strategy: INCREMENTAL
+    -   Bookmark: date_modified (date-time)
+
+### responses
+
+-   Endpoint: https://api.surveymonkey.com/v3/surveys/[survey_id]/detail
+-   Primary keys: id
+-   Replication strategy: INCREMENTAL
+    -   Bookmark: date_modified (date-time)
+
+### simplified_responses
+
+-   Endpoint: https://api.surveymonkey.com/v3/surveys/[survey_id]/detail
+-   Primary keys: id
+-   Replication strategy: INCREMENTAL
+    -   Bookmark: date_modified (date-time)
 
 ## Developing
 
