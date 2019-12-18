@@ -11,7 +11,7 @@ setup(
     py_modules=["tap_surveymonkey"],
     install_requires=[
         "singer-python==5.6.0",
-        "requests",
+        "requests==2.22.0",
     ],
     entry_points="""
     [console_scripts]
