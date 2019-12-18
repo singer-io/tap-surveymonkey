@@ -13,6 +13,12 @@ setup(
         "singer-python==5.6.0",
         "requests==2.22.0",
     ],
+    extras_require={
+        'dev': [
+            'ipdb==0.11',
+            'pylint==2.4.4',
+        ]
+    },
     entry_points="""
     [console_scripts]
     tap-surveymonkey=tap_surveymonkey:main

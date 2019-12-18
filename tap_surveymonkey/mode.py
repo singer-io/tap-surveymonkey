@@ -56,7 +56,7 @@ def sync(config, state, catalog):
                 state
             )
             if state:
-                LOGGER.info('Syncing stream: {}'.format(stream_id))
+                LOGGER.info('Syncing stream: %s', stream_id)
                 singer.write_state(state)
 
 

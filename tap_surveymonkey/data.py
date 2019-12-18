@@ -17,7 +17,7 @@ class SurveyMonkey:
             'Content-Type': 'application/json'
         }
         url = 'https://api.surveymonkey.com/v3/%s' % endpoint
-        LOGGER.info('URL={}'.format(endpoint))
+        LOGGER.info('URL=%s', endpoint)
         resp = requests.request(method, url, headers=headers, **request_kwargs)
 
         # check rate limit
