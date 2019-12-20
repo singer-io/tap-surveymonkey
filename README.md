@@ -128,3 +128,5 @@ tap-surveymonkey --config tap_config.json --catalog catalog.json | singer-check-
 ```
 
 ---
+
+Copyright &copy; 2019 Stitch
