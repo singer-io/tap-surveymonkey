@@ -353,7 +353,20 @@
                             "type": "boolean"
                           },
                           "image": {
-                            "type": "string"
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                              "url": {
+                                "type": "string"
+                              },
+                              "s3_key": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "url"
+                            ],
+                            "title": "Image"
                           }
                         },
                         "required": [
@@ -507,6 +520,9 @@
                         "additionalProperties": false,
                         "properties": {
                           "url": {
+                            "type": "string"
+                          },
+                          "s3_key": {
                             "type": "string"
                           }
                         },
