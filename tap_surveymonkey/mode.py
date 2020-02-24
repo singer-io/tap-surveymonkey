@@ -124,11 +124,10 @@ def sync_survey_details(config, state):
     surveys = sm_client.make_request('surveys', params=params, state=state)
     while True:
         if not surveys:
-            LOGGER.critical("Resource not found")
-            return None
+            raise Exception("Resource not found")
         if surveys.get('error'):
-            LOGGER.critical(surveys)
-            return None
+            raise Exception(surveys)
+
         for survey in surveys['data']:
             survey_modified = datetime.datetime.strptime(survey['date_modified'], SM_DATE_FORMAT)
             survey_modified = pytz.utc.localize(survey_modified)
@@ -168,8 +167,8 @@ def sync_survey_details(config, state):
 def sync_responses(config, state, simplify=False):
     survey_id = config.get('survey_id')
     if not survey_id:
-        LOGGER.critical("survey id not provided. ")
-        return None
+        raise Exception("Survey ID not provided. Syncing Responses requires a Survey ID. ")
+
     stream_id = 'simplified_responses' if simplify else 'responses'
     access_token = config['access_token']
     sm_client = SurveyMonkey(access_token)
@@ -196,11 +195,10 @@ def sync_responses(config, state, simplify=False):
             'surveys/%s/responses/bulk' % survey_id, params=params, state=state)
     while True:
         if not responses:
-            LOGGER.critical("Resource not found")
-            return None
+            raise Exception("Resource not found")
         if responses.get('error'):
-            LOGGER.critical(responses)
-            return None
+            raise Exception(responses)
+
         for response in responses['data']:
             date_modified = response['date_modified']
             if date_modified[-3:-2] == ":":
