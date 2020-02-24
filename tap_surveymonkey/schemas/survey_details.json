@@ -32,7 +32,11 @@
                     "type": "string"
                   }
                 },
-                "required": ["max", "message", "min"],
+                "required": [
+                  "max",
+                  "message",
+                  "min"
+                ],
                 "title": "Range"
               }
             },
@@ -40,11 +44,18 @@
               "type": "string"
             }
           },
-          "required": ["ranges", "ranges_type"],
+          "required": [
+            "ranges",
+            "ranges_type"
+          ],
           "title": "Feedback"
         }
       },
-      "required": ["feedback", "is_quiz_mode", "show_results_type"],
+      "required": [
+        "feedback",
+        "is_quiz_mode",
+        "show_results_type"
+      ],
       "title": "SurveyQuizOptions"
     },
     "response_count": {
@@ -74,7 +85,12 @@
           "type": "string"
         }
       },
-      "required": ["done_button", "exit_button", "next_button", "prev_button"],
+      "required": [
+        "done_button",
+        "exit_button",
+        "next_button",
+        "prev_button"
+      ],
       "title": "ButtonsText"
     },
     "folder_id": {
@@ -182,7 +198,10 @@
                           "type": "boolean"
                         }
                       },
-                      "required": ["ignore_last", "type"],
+                      "required": [
+                        "ignore_last",
+                        "type"
+                      ],
                       "title": "Sorting"
                     },
                     {
@@ -226,7 +245,11 @@
                           ]
                         }
                       },
-                      "required": ["amount", "text", "type"],
+                      "required": [
+                        "amount",
+                        "text",
+                        "type"
+                      ],
                       "title": "Required"
                     },
                     {
@@ -297,7 +320,9 @@
                                 "type": "integer"
                               }
                             },
-                            "required": ["score"],
+                            "required": [
+                              "score"
+                            ],
                             "title": "ChoiceQuizOptions"
                           },
                           "visible": {
@@ -328,10 +353,15 @@
                             "type": "boolean"
                           },
                           "image": {
-                              "type": "string"
+                            "type": "string"
                           }
                         },
-                        "required": ["id", "position", "text", "visible"],
+                        "required": [
+                          "id",
+                          "position",
+                          "text",
+                          "visible"
+                        ],
                         "title": "Choice"
                       }
                     },
@@ -360,7 +390,12 @@
                             "type": "string"
                           }
                         },
-                        "required": ["id", "position", "text", "visible"],
+                        "required": [
+                          "id",
+                          "position",
+                          "text",
+                          "visible"
+                        ],
                         "title": "Row"
                       }
                     },
@@ -411,7 +446,12 @@
                             "type": "boolean"
                           }
                         },
-                        "required": ["id", "position", "text", "visible"],
+                        "required": [
+                          "id",
+                          "position",
+                          "text",
+                          "visible"
+                        ],
                         "title": "Col"
                       }
                     }
@@ -470,14 +510,15 @@
                             "type": "string"
                           }
                         },
-                        "required": ["url"],
+                        "required": [
+                          "url"
+                        ],
                         "title": "Image"
                       },
                       "description": {
                         "type": "string"
                       }
                     },
-                    "required": ["heading"],
                     "title": "Heading"
                   }
                 },
@@ -559,7 +600,9 @@
                       "type": "boolean"
                     }
                   },
-                  "required": ["show_display_number"],
+                  "required": [
+                    "show_display_number"
+                  ],
                   "title": "DisplayOptions"
                 }
               },

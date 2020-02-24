@@ -47,17 +47,19 @@ def sync(config, state, catalog):
     # Loop over streams in catalog
     for stream in catalog['streams']:
         stream_id = stream['tap_stream_id']
+
         if stream_id in selected_stream_ids:
+            LOGGER.info('Syncing stream: %s', stream_id)
+
             sync_func = SYNC_FUNCTIONS[stream_id]
             singer.write_schema(stream_id, stream['schema'], ['id'])
 
-            state = sync_func(
+            ret_state = sync_func(
                 config,
                 state
             )
-            if state:
-                LOGGER.info('Syncing stream: %s', stream_id)
-                singer.write_state(state)
+            if ret_state:
+                state = ret_state
 
 
 def strptime(dtime):
@@ -121,9 +123,11 @@ def sync_survey_details(config, state):
     }
     surveys = sm_client.make_request('surveys', params=params, state=state)
     while True:
+        if not surveys:
+            raise Exception("Resource not found")
         if surveys.get('error'):
-            LOGGER.critical(surveys)
-            return None
+            raise Exception(surveys)
+
         for survey in surveys['data']:
             survey_modified = datetime.datetime.strptime(survey['date_modified'], SM_DATE_FORMAT)
             survey_modified = pytz.utc.localize(survey_modified)
@@ -134,9 +138,7 @@ def sync_survey_details(config, state):
             survey_details = sm_client.make_request(
                 'surveys/%s/details' % survey['id'], state=state)
             patch_time_str(survey_details)
-            singer.write_records(stream_id,
-                                 [survey_details]
-                                 )
+            singer.write_records(stream_id, [survey_details])
 
             state['bookmarks'][stream_id] = {} if not state['bookmarks'].get(
                 stream_id) else state['bookmarks'][stream_id]
@@ -157,12 +159,16 @@ def sync_survey_details(config, state):
     state['bookmarks'][stream_id] = {} if not state['bookmarks'].get(
         stream_id) else state['bookmarks'][stream_id]
     state['bookmarks'][stream_id]['full_sync'] = singer.utils.strftime(max_time)
+    singer.write_state(state)
 
     return state
 
 
 def sync_responses(config, state, simplify=False):
-    survey_id = config['survey_id']
+    survey_id = config.get('survey_id')
+    if not survey_id:
+        raise Exception("Survey ID not provided. Syncing Responses requires a Survey ID. ")
+
     stream_id = 'simplified_responses' if simplify else 'responses'
     access_token = config['access_token']
     sm_client = SurveyMonkey(access_token)
@@ -188,9 +194,11 @@ def sync_responses(config, state, simplify=False):
         responses = sm_client.make_request(
             'surveys/%s/responses/bulk' % survey_id, params=params, state=state)
     while True:
+        if not responses:
+            raise Exception("Resource not found")
         if responses.get('error'):
-            LOGGER.critical(responses)
-            return None
+            raise Exception(responses)
+
         for response in responses['data']:
             date_modified = response['date_modified']
             if date_modified[-3:-2] == ":":
@@ -225,6 +233,7 @@ def sync_responses(config, state, simplify=False):
     state['bookmarks'][stream_id] = {} if not state['bookmarks'].get(
         stream_id) else state['bookmarks'][stream_id]
     state['bookmarks'][stream_id]['full_sync'] = singer.utils.strftime(max_time)
+    singer.write_state(state)
 
     return state
 
