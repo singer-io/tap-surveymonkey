@@ -85,7 +85,10 @@
                                                 "type": ["null", "string"]
                                             },
                                             "tag_data": {
-                                                "type": "array"
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string"
+                                                }
                                             }
                                         },
                                         "title": "Answer"
