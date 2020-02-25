@@ -97,7 +97,9 @@
       "type": "string"
     },
     "custom_variables": {
-      "type": "object"
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {}
     },
     "nickname": {
       "type": "string"
