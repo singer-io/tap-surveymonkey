@@ -87,7 +87,9 @@
                                             "tag_data": {
                                                 "type": "array",
                                                 "items": {
-                                                    "type": "string"
+                                                    "type": "object",
+                                                    "additionalProperties": true,
+                                                    "properties": {}
                                                 }
                                             }
                                         },
