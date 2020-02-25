@@ -97,7 +97,9 @@
       "type": "string"
     },
     "custom_variables": {
-      "type": "object"
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {}
     },
     "nickname": {
       "type": "string"
@@ -186,15 +188,13 @@
                   }
                 },
                 "sorting": {
-                  "oneOf": [
-                    {
-                      "type": "object",
-                      "additionalProperties": false,
-                      "properties": {
-                        "type": {
-                          "type": "string"
-                        },
-                        "ignore_last": {
+                    "type": ["null", "object"],
+                    "additionalProperties": false,
+                        "properties": {
+                            "type": {
+                              "type": "string"
+                            },
+                            "ignore_last": {
                           "type": "boolean"
                         }
                       },
@@ -204,11 +204,6 @@
                       ],
                       "title": "Sorting"
                     },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
                 "family": {
                   "type": "string"
                 },
@@ -216,33 +211,17 @@
                   "type": "string"
                 },
                 "required": {
-                  "oneOf": [
-                    {
-                      "type": "object",
+                  "type": ["null", "object"],
                       "additionalProperties": false,
                       "properties": {
                         "text": {
                           "type": "string"
                         },
                         "amount": {
-                          "oneOf": [
-                            {
-                              "type": "null"
-                            },
-                            {
-                              "type": "string"
-                            }
-                          ]
+                          "type": ["null", "string"]
                         },
                         "type": {
-                          "oneOf": [
-                            {
-                              "type": "null"
-                            },
-                            {
-                              "type": "string"
-                            }
-                          ]
+                          "type": ["null", "string"]
                         }
                       },
                       "required": [
@@ -252,11 +231,6 @@
                       ],
                       "title": "Required"
                     },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
                 "answers": {
                   "type": "object",
                   "additionalProperties": false,
@@ -542,46 +516,23 @@
                   "type": "integer"
                 },
                 "validation": {
-                  "oneOf": [
-                    {
-                      "type": "object",
+                  "type": ["null", "object"],
                       "additionalProperties": false,
                       "properties": {
                         "sum_text": {
                           "type": "string"
                         },
                         "min": {
-                          "oneOf": [
-                            {
-                              "type": "null"
-                            },
-                            {
-                              "type": "string"
-                            }
-                          ]
+                          "type": ["null", "string"]
                         },
                         "text": {
                           "type": "string"
                         },
                         "sum": {
-                          "oneOf": [
-                            {
-                              "type": "integer"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ]
+                          "type": ["null", "integer"]
                         },
                         "max": {
-                          "oneOf": [
-                            {
-                              "type": "null"
-                            },
-                            {
-                              "type": "string"
-                            }
-                          ]
+                          "type": ["null", "string"]
                         },
                         "type": {
                           "type": "string"
@@ -597,11 +548,6 @@
                       ],
                       "title": "Validation"
                     },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
                 "id": {
                   "type": "string"
                 },
