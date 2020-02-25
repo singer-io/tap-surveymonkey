@@ -9,7 +9,9 @@
             "type": "string"
         },
         "custom_variables": {
-            "type": "object"
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {}
         },
         "ip_address": {
             "type": "string"
@@ -18,7 +20,9 @@
             "type": "string"
         },
         "logic_path": {
-            "type": "object"
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {}
         },
         "date_modified": {
             "type": "string",
@@ -141,7 +145,9 @@
             "type": "string"
         },
         "metadata": {
-            "type": "object"
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {}
         }
     }
 }
