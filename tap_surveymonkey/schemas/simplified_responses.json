@@ -77,6 +77,9 @@
                                         "type": "object",
                                         "additionalProperties": false,
                                         "properties": {
+                                            "is_correct": {
+                                                "type": "boolean"
+                                            },
                                             "choice_id": {
                                                 "type": [
                                                     "null",
@@ -118,6 +121,9 @@
                                                     "null",
                                                     "string"
                                                 ]
+                                            },
+                                            "score": {
+                                                "type": "integer"
                                             },
                                             "tag_data": {
                                                 "type": "array",
@@ -161,6 +167,30 @@
                     }
                 },
                 "title": "Page"
+            }
+        },
+        "quiz_results": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "correct": {
+                    "type": "integer"
+                },
+                "incorrect": {
+                    "type": "integer"
+                },
+                "partially_correct": {
+                    "type": "integer"
+                },
+                "total_questions": {
+                    "type": "integer"
+                },
+                "score": {
+                    "type": "integer"
+                },
+                "total_score": {
+                    "type": "integer"
+                }
             }
         },
         "page_path": {

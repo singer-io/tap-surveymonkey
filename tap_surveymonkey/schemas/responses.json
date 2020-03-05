@@ -77,6 +77,9 @@
                                         "type": "object",
                                         "additionalProperties": false,
                                         "properties": {
+                                            "is_correct": {
+                                                "type": "boolean"
+                                            },
                                             "choice_id": {
                                                 "type": "string"
                                             },
@@ -94,6 +97,17 @@
                                             },
                                             "image": {
                                                 "type": "string"
+                                            },
+                                            "score": {
+                                                "type": "integer"
+                                            },
+                                            "tag_data": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "object",
+                                                    "additionalProperties": true,
+                                                    "properties": {}
+                                                }
                                             }
                                         },
                                         "required": [],
@@ -117,6 +131,30 @@
                     "questions"
                 ],
                 "title": "Page"
+            }
+        },
+        "quiz_results": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "correct": {
+                    "type": "integer"
+                },
+                "incorrect": {
+                    "type": "integer"
+                },
+                "partially_correct": {
+                    "type": "integer"
+                },
+                "total_questions": {
+                    "type": "integer"
+                },
+                "score": {
+                    "type": "integer"
+                },
+                "total_score": {
+                    "type": "integer"
+                }
             }
         },
         "page_path": {
