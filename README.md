@@ -18,7 +18,7 @@ This tap:
 
 To pull all surveys, the configuration parameters `access_token` and `start_date` are required.
 
-To pull responses or simplified responses for a survey, the configuration parameters `access_token`, `start_date`, and `survey_id` are required. The parameter `fetch_per_page` _(default: 50, max: 100)_ is optional to adjust the response-size for faster response times or larger batches thereby and reduced number of API-calls.
+To pull responses or simplified responses for a survey, the configuration parameters `access_token`, `start_date`, and `survey_id` are required. The parameter `fetch_page_size` _(default: 50, max: 100)_ is optional to adjust the response-size for faster response times or larger batches thereby and reduced number of API-calls.
 
 The [surveys](https://developer.surveymonkey.com/api/v3/#surveys-id-details) and [responses](https://developer.surveymonkey.com/api/v3/#surveys-id-responses-bulk) resources will pull data in the form described on the SurveyMonkey API docs.
 

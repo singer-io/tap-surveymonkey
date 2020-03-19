@@ -115,7 +115,7 @@ def patch_time_str(obj_dict):
 def sync_survey_details(config, state):
     stream_id = 'survey_details'
     access_token = config['access_token']
-    per_page = int(config.get("fetch_per_page", "50"))
+    per_page = int(config.get("fetch_page_size", "50"))
     sm_client = SurveyMonkey(access_token)
     params = {
         'per_page': per_page,
@@ -172,7 +172,7 @@ def sync_responses(config, state, simplify=False):
 
     stream_id = 'simplified_responses' if simplify else 'responses'
     access_token = config['access_token']
-    per_page = int(config.get("fetch_per_page", "50"))  # Max 100
+    per_page = int(config.get("fetch_page_size", "50"))  # Max 100
     sm_client = SurveyMonkey(access_token)
     last_modified_at = None
 
