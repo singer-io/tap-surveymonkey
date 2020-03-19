@@ -13,6 +13,15 @@
             "additionalProperties": true,
             "properties": {}
         },
+        "first_name": {
+            "type": "string"
+        },
+        "last_name": {
+            "type": "string"
+        },
+        "email_address": {
+            "type": "string"
+        },
         "ip_address": {
             "type": "string"
         },
@@ -30,7 +39,12 @@
         },
         "response_status": {
             "type": "string",
-            "enum": ["partial", "completed", "disqualified", "overquota"],
+            "enum": [
+                "partial",
+                "completed",
+                "disqualified",
+                "overquota"
+            ],
             "title": "ResponseStatus"
         },
         "custom_value": {
@@ -63,26 +77,53 @@
                                         "type": "object",
                                         "additionalProperties": false,
                                         "properties": {
+                                            "is_correct": {
+                                                "type": "boolean"
+                                            },
                                             "choice_id": {
-                                                "type": ["null", "string"]
+                                                "type": [
+                                                    "null",
+                                                    "string"
+                                                ]
                                             },
                                             "row_id": {
-                                                "type": ["null", "string"]
+                                                "type": [
+                                                    "null",
+                                                    "string"
+                                                ]
                                             },
                                             "text": {
-                                                "type": ["null", "string"]
+                                                "type": [
+                                                    "null",
+                                                    "string"
+                                                ]
                                             },
                                             "simple_text": {
-                                                "type": ["null", "string"]
+                                                "type": [
+                                                    "null",
+                                                    "string"
+                                                ]
                                             },
                                             "other_id": {
-                                                "type": ["null", "string"]
+                                                "type": [
+                                                    "null",
+                                                    "string"
+                                                ]
                                             },
                                             "col_id": {
-                                                "type": ["null", "string"]
+                                                "type": [
+                                                    "null",
+                                                    "string"
+                                                ]
                                             },
                                             "image": {
-                                                "type": ["null", "string"]
+                                                "type": [
+                                                    "null",
+                                                    "string"
+                                                ]
+                                            },
+                                            "score": {
+                                                "type": "integer"
                                             },
                                             "tag_data": {
                                                 "type": "array",
@@ -97,16 +138,28 @@
                                     }
                                 },
                                 "variable_id": {
-                                    "type": ["null", "string"]
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
                                 },
                                 "family": {
-                                    "type": ["null", "string"]
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
                                 },
                                 "subtype": {
-                                    "type": ["null", "string"]
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
                                 },
                                 "heading": {
-                                    "type": ["null", "string"]
+                                    "type": [
+                                        "null",
+                                        "string"
+                                    ]
                                 }
                             },
                             "title": "Question"
@@ -114,6 +167,30 @@
                     }
                 },
                 "title": "Page"
+            }
+        },
+        "quiz_results": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "correct": {
+                    "type": "integer"
+                },
+                "incorrect": {
+                    "type": "integer"
+                },
+                "partially_correct": {
+                    "type": "integer"
+                },
+                "total_questions": {
+                    "type": "integer"
+                },
+                "score": {
+                    "type": "integer"
+                },
+                "total_score": {
+                    "type": "integer"
+                }
             }
         },
         "page_path": {
@@ -154,5 +231,29 @@
             "additionalProperties": true,
             "properties": {}
         }
-    }
+    },
+    "required": [
+        "analyze_url",
+        "collection_mode",
+        "collector_id",
+        "custom_value",
+        "custom_variables",
+        "date_created",
+        "date_modified",
+        "edit_url",
+        "href",
+        "id",
+        "ip_address",
+        "first_name",
+        "last_name",
+        "email_address",
+        "logic_path",
+        "metadata",
+        "page_path",
+        "pages",
+        "recipient_id",
+        "response_status",
+        "survey_id",
+        "total_time"
+    ]
 }
