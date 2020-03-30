@@ -452,6 +452,9 @@
                 "href": {
                   "type": "string"
                 },
+                "nickname": {
+                  "type": "string"
+                },
                 "headings": {
                   "type": "array",
                   "items": {
