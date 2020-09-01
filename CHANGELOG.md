@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.0.0
+  * Releasing GA
+
 ## 0.1.6
   * Adds to survey_details schema [#12](https://github.com/singer-io/tap-surveymonkey/pull/12)
 
