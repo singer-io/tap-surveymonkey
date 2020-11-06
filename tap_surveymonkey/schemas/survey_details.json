@@ -406,11 +406,6 @@
                           },
                           "description": {
                             "type": "string",
-                            "enum": [
-                              "",
-                              "Not at all likely",
-                              "Extremely likely"
-                            ],
                             "title": "Description"
                           },
                           "weight": {
