@@ -1,10 +1,10 @@
 {
   "type": "object",
-  "additionalProperties": false,
+  "additionalProperties": true,
   "properties": {
     "quiz_options": {
       "type": "object",
-      "additionalProperties": false,
+      "additionalProperties": true,
       "properties": {
         "show_results_type": {
           "type": "string"
@@ -14,13 +14,13 @@
         },
         "feedback": {
           "type": "object",
-          "additionalProperties": false,
+          "additionalProperties": true,
           "properties": {
             "ranges": {
               "type": "array",
               "items": {
                 "type": "object",
-                "additionalProperties": false,
+                "additionalProperties": true,
                 "properties": {
                   "max": {
                     "type": "string"
@@ -70,7 +70,7 @@
     },
     "buttons_text": {
       "type": "object",
-      "additionalProperties": false,
+      "additionalProperties": true,
       "properties": {
         "done_button": {
           "type": "string"
@@ -97,9 +97,9 @@
       "type": "string"
     },
     "custom_variables": {
-        "type": "object",
-        "additionalProperties": true,
-        "properties": {}
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {}
     },
     "nickname": {
       "type": "string"
@@ -151,7 +151,7 @@
       "type": "array",
       "items": {
         "type": "object",
-        "additionalProperties": false,
+        "additionalProperties": true,
         "properties": {
           "href": {
             "type": "string"
@@ -163,8 +163,14 @@
             "type": "array",
             "items": {
               "type": "object",
-              "additionalProperties": false,
+              "additionalProperties": true,
               "properties": {
+                "nickname": {
+                  "type": [
+                    "null",
+                    "string"
+                  ]
+                },
                 "quiz_options": {
                   "type": "object",
                   "properties": {
@@ -188,56 +194,143 @@
                   }
                 },
                 "sorting": {
-                    "type": ["null", "object"],
-                    "additionalProperties": false,
-                        "properties": {
-                            "type": {
-                              "type": "string"
-                            },
-                            "ignore_last": {
-                          "type": "boolean"
-                        }
-                      },
-                      "required": [
-                        "ignore_last",
-                        "type"
-                      ],
-                      "title": "Sorting"
+                  "type": [
+                    "null",
+                    "object"
+                  ],
+                  "additionalProperties": true,
+                  "properties": {
+                    "type": {
+                      "type": "string"
                     },
+                    "ignore_last": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "ignore_last",
+                    "type"
+                  ],
+                  "title": "Sorting"
+                },
                 "family": {
                   "type": "string"
                 },
                 "subtype": {
                   "type": "string"
                 },
-                "required": {
-                  "type": ["null", "object"],
-                      "additionalProperties": false,
-                      "properties": {
-                        "text": {
-                          "type": "string"
-                        },
-                        "amount": {
-                          "type": ["null", "string"]
-                        },
-                        "type": {
-                          "type": ["null", "string"]
-                        }
-                      },
-                      "required": [
-                        "amount",
-                        "text",
-                        "type"
-                      ],
-                      "title": "Required"
+                "layout": {
+                  "type": [
+                    "null",
+                    "object"
+                  ],
+                  "additionalProperties": true,
+                  "properties": {
+                    "left_spacing": {
+                      "type": [
+                        "null",
+                        "number"
+                      ]
                     },
+                    "top_spacing": {
+                      "type": [
+                        "null",
+                        "number"
+                      ]
+                    },
+                    "right_spacing": {
+                      "type": [
+                        "null",
+                        "number"
+                      ]
+                    },
+                    "bottom_spacing": {
+                      "type": [
+                        "null",
+                        "number"
+                      ]
+                    },
+                    "width_format": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "width": {
+                      "type": [
+                        "null",
+                        "number"
+                      ]
+                    },
+                    "col_width_format": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "col_width": {
+                      "type": [
+                        "null",
+                        "number"
+                      ]
+                    },
+                    "position": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "num_chars": {
+                      "type": [
+                        "null",
+                        "number"
+                      ]
+                    },
+                    "num_lines": {
+                      "type": [
+                        "null",
+                        "number"
+                      ]
+                    }
+                  }
+                },
+                "required": {
+                  "type": [
+                    "null",
+                    "object"
+                  ],
+                  "additionalProperties": true,
+                  "properties": {
+                    "text": {
+                      "type": "string"
+                    },
+                    "amount": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "type": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "amount",
+                    "text",
+                    "type"
+                  ],
+                  "title": "Required"
+                },
                 "answers": {
                   "type": "object",
-                  "additionalProperties": false,
+                  "additionalProperties": true,
                   "properties": {
                     "other": {
                       "type": "object",
-                      "additionalProperties": false,
+                      "additionalProperties": true,
                       "properties": {
                         "id": {
                           "type": "string"
@@ -284,11 +377,11 @@
                       "type": "array",
                       "items": {
                         "type": "object",
-                        "additionalProperties": false,
+                        "additionalProperties": true,
                         "properties": {
                           "quiz_options": {
                             "type": "object",
-                            "additionalProperties": false,
+                            "additionalProperties": true,
                             "properties": {
                               "score": {
                                 "type": "integer"
@@ -313,11 +406,6 @@
                           },
                           "description": {
                             "type": "string",
-                            "enum": [
-                              "",
-                              "Not at all likely",
-                              "Extremely likely"
-                            ],
                             "title": "Description"
                           },
                           "weight": {
@@ -328,7 +416,7 @@
                           },
                           "image": {
                             "type": "object",
-                            "additionalProperties": false,
+                            "additionalProperties": true,
                             "properties": {
                               "url": {
                                 "type": "string"
@@ -356,7 +444,7 @@
                       "type": "array",
                       "items": {
                         "type": "object",
-                        "additionalProperties": false,
+                        "additionalProperties": true,
                         "properties": {
                           "visible": {
                             "type": "boolean"
@@ -390,7 +478,7 @@
                       "type": "array",
                       "items": {
                         "type": "object",
-                        "additionalProperties": false,
+                        "additionalProperties": true,
                         "properties": {
                           "visible": {
                             "type": "boolean"
@@ -408,7 +496,7 @@
                             "type": "array",
                             "items": {
                               "type": "object",
-                              "additionalProperties": false,
+                              "additionalProperties": true,
                               "properties": {
                                 "visible": {
                                   "type": "boolean"
@@ -459,14 +547,14 @@
                   "type": "array",
                   "items": {
                     "type": "object",
-                    "additionalProperties": false,
+                    "additionalProperties": true,
                     "properties": {
                       "heading": {
                         "type": "string"
                       },
                       "random_assignment": {
                         "type": "object",
-                        "additionalProperties": false,
+                        "additionalProperties": true,
                         "properties": {
                           "position": {
                             "type": "integer"
@@ -494,7 +582,7 @@
                       },
                       "image": {
                         "type": "object",
-                        "additionalProperties": false,
+                        "additionalProperties": true,
                         "properties": {
                           "url": {
                             "type": "string"
@@ -519,38 +607,50 @@
                   "type": "integer"
                 },
                 "validation": {
-                  "type": ["null", "object"],
-                      "additionalProperties": false,
-                      "properties": {
-                        "sum_text": {
-                          "type": "string"
-                        },
-                        "min": {
-                          "type": ["null", "string"]
-                        },
-                        "text": {
-                          "type": "string"
-                        },
-                        "sum": {
-                          "type": ["null", "integer"]
-                        },
-                        "max": {
-                          "type": ["null", "string"]
-                        },
-                        "type": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "max",
-                        "min",
-                        "sum",
-                        "sum_text",
-                        "text",
-                        "type"
-                      ],
-                      "title": "Validation"
+                  "type": [
+                    "null",
+                    "object"
+                  ],
+                  "additionalProperties": true,
+                  "properties": {
+                    "sum_text": {
+                      "type": "string"
                     },
+                    "min": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "text": {
+                      "type": "string"
+                    },
+                    "sum": {
+                      "type": [
+                        "null",
+                        "integer"
+                      ]
+                    },
+                    "max": {
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "max",
+                    "min",
+                    "sum",
+                    "sum_text",
+                    "text",
+                    "type"
+                  ],
+                  "title": "Validation"
+                },
                 "id": {
                   "type": "string"
                 },

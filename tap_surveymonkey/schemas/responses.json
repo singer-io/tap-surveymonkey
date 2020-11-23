@@ -1,6 +1,6 @@
 {
     "type": "object",
-    "additionalProperties": false,
+    "additionalProperties": true,
     "properties": {
         "total_time": {
             "type": "integer"
@@ -57,7 +57,7 @@
             "type": "array",
             "items": {
                 "type": "object",
-                "additionalProperties": false,
+                "additionalProperties": true,
                 "properties": {
                     "id": {
                         "type": "string"
@@ -66,7 +66,7 @@
                         "type": "array",
                         "items": {
                             "type": "object",
-                            "additionalProperties": false,
+                            "additionalProperties": true,
                             "properties": {
                                 "id": {
                                     "type": "string"
@@ -75,7 +75,7 @@
                                     "type": "array",
                                     "items": {
                                         "type": "object",
-                                        "additionalProperties": false,
+                                        "additionalProperties": true,
                                         "properties": {
                                             "is_correct": {
                                                 "type": "boolean"
@@ -135,7 +135,7 @@
         },
         "quiz_results": {
             "type": "object",
-            "additionalProperties": false,
+            "additionalProperties": true,
             "properties": {
                 "correct": {
                     "type": "integer"
