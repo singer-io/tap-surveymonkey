@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.1
+  * Add layout to Question object schema
+  * Set `additionalProperties` to true on all schemas
+
 ## 1.0.0
   * Releasing GA
 
