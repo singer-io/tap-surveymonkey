@@ -4,7 +4,7 @@
   "properties": {
     "quiz_options": {
       "type": "object",
-      "additionalProperties": false,
+      "additionalProperties": true,
       "properties": {
         "show_results_type": {
           "type": "string"
@@ -14,13 +14,13 @@
         },
         "feedback": {
           "type": "object",
-          "additionalProperties": false,
+          "additionalProperties": true,
           "properties": {
             "ranges": {
               "type": "array",
               "items": {
                 "type": "object",
-                "additionalProperties": false,
+                "additionalProperties": true,
                 "properties": {
                   "max": {
                     "type": "string"
@@ -70,7 +70,7 @@
     },
     "buttons_text": {
       "type": "object",
-      "additionalProperties": false,
+      "additionalProperties": true,
       "properties": {
         "done_button": {
           "type": "string"
@@ -151,7 +151,7 @@
       "type": "array",
       "items": {
         "type": "object",
-        "additionalProperties": false,
+        "additionalProperties": true,
         "properties": {
           "href": {
             "type": "string"
@@ -198,7 +198,7 @@
                     "null",
                     "object"
                   ],
-                  "additionalProperties": false,
+                  "additionalProperties": true,
                   "properties": {
                     "type": {
                       "type": "string"
@@ -224,7 +224,7 @@
                     "null",
                     "object"
                   ],
-                  "additionalProperties": false,
+                  "additionalProperties": true,
                   "properties": {
                     "left_spacing": {
                       "type": [
@@ -299,7 +299,7 @@
                     "null",
                     "object"
                   ],
-                  "additionalProperties": false,
+                  "additionalProperties": true,
                   "properties": {
                     "text": {
                       "type": "string"
@@ -326,11 +326,11 @@
                 },
                 "answers": {
                   "type": "object",
-                  "additionalProperties": false,
+                  "additionalProperties": true,
                   "properties": {
                     "other": {
                       "type": "object",
-                      "additionalProperties": false,
+                      "additionalProperties": true,
                       "properties": {
                         "id": {
                           "type": "string"
@@ -377,11 +377,11 @@
                       "type": "array",
                       "items": {
                         "type": "object",
-                        "additionalProperties": false,
+                        "additionalProperties": true,
                         "properties": {
                           "quiz_options": {
                             "type": "object",
-                            "additionalProperties": false,
+                            "additionalProperties": true,
                             "properties": {
                               "score": {
                                 "type": "integer"
@@ -416,7 +416,7 @@
                           },
                           "image": {
                             "type": "object",
-                            "additionalProperties": false,
+                            "additionalProperties": true,
                             "properties": {
                               "url": {
                                 "type": "string"
@@ -444,7 +444,7 @@
                       "type": "array",
                       "items": {
                         "type": "object",
-                        "additionalProperties": false,
+                        "additionalProperties": true,
                         "properties": {
                           "visible": {
                             "type": "boolean"
@@ -478,7 +478,7 @@
                       "type": "array",
                       "items": {
                         "type": "object",
-                        "additionalProperties": false,
+                        "additionalProperties": true,
                         "properties": {
                           "visible": {
                             "type": "boolean"
@@ -496,7 +496,7 @@
                             "type": "array",
                             "items": {
                               "type": "object",
-                              "additionalProperties": false,
+                              "additionalProperties": true,
                               "properties": {
                                 "visible": {
                                   "type": "boolean"
@@ -547,14 +547,14 @@
                   "type": "array",
                   "items": {
                     "type": "object",
-                    "additionalProperties": false,
+                    "additionalProperties": true,
                     "properties": {
                       "heading": {
                         "type": "string"
                       },
                       "random_assignment": {
                         "type": "object",
-                        "additionalProperties": false,
+                        "additionalProperties": true,
                         "properties": {
                           "position": {
                             "type": "integer"
@@ -582,7 +582,7 @@
                       },
                       "image": {
                         "type": "object",
-                        "additionalProperties": false,
+                        "additionalProperties": true,
                         "properties": {
                           "url": {
                             "type": "string"
@@ -611,7 +611,7 @@
                     "null",
                     "object"
                   ],
-                  "additionalProperties": false,
+                  "additionalProperties": true,
                   "properties": {
                     "sum_text": {
                       "type": "string"
