@@ -38,9 +38,9 @@ which is a human-readable form of the survey respondent's response to question. 
     We recommend using a virtualenv:
 
     ```
-    virtualenv -p python3 venv
+    python3 -m venv venv
     source venv/bin/activate
-    pip3 install -e .
+    pip install -e .
     ```
 
 2.  Create a SurveyMonkey access token
@@ -50,8 +50,6 @@ which is a human-readable form of the survey respondent's response to question. 
 3.  Set up your config file.
 
     An example config file is provided in `sample_config.json`, the access token and survey in that file are invalid, and will error out. Replace them with your own valid ones.
-
-    `survey_id` is required only for the `responses` and `simplified_responses` streams. It can be acquired within the same page where it shows the access token. Also, it can be retrieved by running the tap with the `survey_details` stream, or by using the `/v3/surveys` endpoint on the [SurveyMonkey API](https://developer.surveymonkey.com/api/v3/#surveys).
 
 4.  Run the tap in discovery mode to get catalog.json file.
 
@@ -88,7 +86,23 @@ which is a human-readable form of the survey respondent's response to question. 
     tap-surveymonkey --config config.json --catalog catalog.json | target-stitch --config target_config.json --dry-run > state.json
     ```
 
+## Configuration
+
+| Config property    | Required  | Description
+| ------------------ | --------- | --------------
+| `access_token`     | Yes       | See https://developer.surveymonkey.com/api/v3/#oauth-2-0-flow
+| `start_date`       | No        | For streams with replication method `INCREMENTAL` the start date time to be used
+| `page_size`        | No, default `"50"` | The page size for paginated streams
+| `survey_id`        | No        | In case you just want to get data for just one survey. Does not work with stream `surveys`.
+
 ## Streams
+
+### survey_details
+
+-   Endpoint: https://api.surveymonkey.com/v3/surveys
+-   Primary keys: id
+-   Replication strategy: INCREMENTAL
+    -   Bookmark: date_modified (date-time)
 
 ### survey_details
 
@@ -128,3 +142,4 @@ tap-surveymonkey --config tap_config.json --catalog catalog.json | singer-check-
 ---
 
 Copyright &copy; 2019 Stitch
+Copyright &copy; 2021 Horze International GmbH

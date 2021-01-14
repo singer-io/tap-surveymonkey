@@ -1,6 +1,6 @@
 {
     "type": "object",
-    "additionalProperties": true,
+    "additionalProperties": false,
     "properties": {
         "total_time": {
             "type": "integer"
@@ -197,27 +197,7 @@
         }
     },
     "required": [
-        "analyze_url",
-        "collection_mode",
-        "collector_id",
-        "custom_value",
-        "custom_variables",
-        "date_created",
         "date_modified",
-        "edit_url",
-        "href",
-        "id",
-        "ip_address",
-        "first_name",
-        "last_name",
-        "email_address",
-        "logic_path",
-        "metadata",
-        "page_path",
-        "pages",
-        "recipient_id",
-        "response_status",
-        "survey_id",
-        "total_time"
+        "id"
     ]
 }
