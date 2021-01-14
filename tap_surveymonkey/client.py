@@ -7,7 +7,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 LOGGER = singer.get_logger()
 
 
-class SurveyMonkey:
+class SurveyMonkeyClient:
     def __init__(self, access_token):
         self.access_token = access_token
 

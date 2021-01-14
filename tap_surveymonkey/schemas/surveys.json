@@ -1,0 +1,36 @@
+{
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+        "id": {
+            "type": "string"
+        },
+        "title": {
+            "type": "string"
+        },
+        "nickname": {
+            "type": "string"
+        },
+        "date_created": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "date_modified": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "response_count": {
+            "type": "integer"
+        },
+        "language": {
+            "type": "string"
+        },
+        "question_count": {
+            "type": "integer"
+        }
+    },
+    "required": [
+        "id",
+        "date_modified"
+    ]
+}
