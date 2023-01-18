@@ -22,3 +22,10 @@ jobs:
             no-else-return,too-few-public-methods,too-many-arguments,
             too-many-branches,too-many-lines,too-many-locals,ungrouped-imports,
             wrong-spelling-in-comment,wrong-spelling-in-docstring'
+
+workflows:
+  version: 2
+  commit:
+    jobs:
+      - build:
+          context: circleci-user
