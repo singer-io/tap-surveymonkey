@@ -15,8 +15,8 @@ jobs:
       - run:
           name: 'pylint'
           command: |
-          source /usr/local/share/virtualenvs/tap-surveymonkey/bin/activate
-          pylint tap_surveymonkey -d C,R,W
+            source /usr/local/share/virtualenvs/tap-surveymonkey/bin/activate
+            pylint tap_surveymonkey -d C,R,W
 
 workflows:
   version: 2
