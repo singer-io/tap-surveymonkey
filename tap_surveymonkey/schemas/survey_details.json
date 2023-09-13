@@ -1,9 +1,9 @@
 {
   "type": "object",
-  "additionalProperties": true,
+  "additionalProperties": false,
   "properties": {
     "quiz_options": {
-      "type": "object",
+      "type": ["object","null"],
       "additionalProperties": true,
       "properties": {
         "show_results_type": {
