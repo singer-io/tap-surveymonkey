@@ -14,9 +14,9 @@ def main():
     # Parse command line arguments
     args = singer.utils.parse_args(REQUIRED_CONFIG_KEYS)
 
-    # If discover flag was passed, run discovery mode and dump output to stdout
+    # If discover flag was passed, run discovery mode
     if args.discover:
-        catalog = discover().dump()
+        catalog = discover()
     # Otherwise run in sync mode
     else:
         if args.catalog:
