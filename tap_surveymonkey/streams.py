@@ -3,7 +3,7 @@ import pytz
 import singer.utils
 from singer import bookmarks, metadata
 
-from .client import SurveyMonkeyClient
+from tap_surveymonkey.client import SurveyMonkeyClient
 
 
 LOGGER = singer.get_logger()
