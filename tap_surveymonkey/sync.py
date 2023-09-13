@@ -2,8 +2,8 @@ import singer
 from singer.transform import Transformer
 from singer import bookmarks, metadata, metrics
 
-from .client import SurveyMonkeyClient
-from .streams import STREAMS
+from tap_surveymonkey.client import SurveyMonkeyClient
+from tap_surveymonkey.streams import STREAMS
 
 
 LOGGER = singer.get_logger()

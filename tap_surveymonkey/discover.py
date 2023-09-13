@@ -3,7 +3,7 @@ from singer import utils
 from singer.catalog import Catalog, CatalogEntry, Schema
 from singer import metadata
 
-from .streams import STREAMS
+from tap_surveymonkey.streams import STREAMS
 
 
 def get_abs_path(path):
@@ -22,7 +22,7 @@ def discover():
     streams = []
 
     for stream_id, stream_object in STREAMS.items():
-        raw_schema=load_schema(stream_id)
+        raw_schema = load_schema(stream_id)
         schema = Schema.from_dict(raw_schema)
 
         mdata = metadata.to_map(metadata.get_standard_metadata(

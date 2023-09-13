@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 import singer
 
-from .discover import discover
-from .sync import sync
+from tap_surveymonkey.discover import discover
+from tap_surveymonkey.sync import sync
 
 
 REQUIRED_CONFIG_KEYS = ["access_token"]
