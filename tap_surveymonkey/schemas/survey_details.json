@@ -3,7 +3,10 @@
   "additionalProperties": false,
   "properties": {
     "quiz_options": {
-      "type": ["object","null"],
+      "type": [
+        "null",
+        "object"
+      ],
       "additionalProperties": true,
       "properties": {
         "show_results_type": {
@@ -538,9 +541,6 @@
                   "type": "boolean"
                 },
                 "href": {
-                  "type": "string"
-                },
-                "nickname": {
                   "type": "string"
                 },
                 "headings": {

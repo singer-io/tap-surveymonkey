@@ -170,7 +170,10 @@
             }
         },
         "quiz_results": {
-            "type": ["object","null"],
+            "type": [
+                "null",
+                "object"
+            ],
             "additionalProperties": true,
             "properties": {
                 "correct": {
