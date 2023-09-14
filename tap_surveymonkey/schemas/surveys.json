@@ -6,13 +6,22 @@
             "type": "string"
         },
         "title": {
-            "type": "string"
+            "type": [
+                "null",
+                "string"
+            ]
         },
         "nickname": {
-            "type": "string"
+            "type": [
+                "null",
+                "string"
+            ]
         },
         "date_created": {
-            "type": "string",
+            "type": [
+                "null",
+                "string"
+            ],
             "format": "date-time"
         },
         "date_modified": {
@@ -20,13 +29,22 @@
             "format": "date-time"
         },
         "response_count": {
-            "type": "integer"
+            "type": [
+                "null",
+                "integer"
+            ]
         },
         "language": {
-            "type": "string"
+            "type": [
+                "null",
+                "string"
+            ]
         },
         "question_count": {
-            "type": "integer"
+            "type": [
+                "null",
+                "integer"
+            ]
         }
     },
     "required": [
