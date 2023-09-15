@@ -12,13 +12,14 @@ This tap:
     -   Surveys
     -   Responses
     -   Simplified Responses
+    -   Survey Details
 
 -   Outputs the schema for each resource
 -   Incrementally pulls data based on the input state
 
 To pull all surveys, the configuration parameters `access_token` and `start_date` are required.
 
-To pull responses or simplified responses for a survey, the configuration parameters `access_token`, `start_date`, and `survey_id` are required. The parameter `page_size` _(default: 50, max: 100)_ is optional to adjust the response-size for faster response times or larger batches thereby and reduced number of API-calls.
+The parameter `page_size` _(default: 50, max: 100)_ is optional to adjust the response-size for faster response times or larger batches thereby and reduced number of API-calls.
 
 The [surveys](https://developer.surveymonkey.com/api/v3/#surveys-id-details) and [responses](https://developer.surveymonkey.com/api/v3/#surveys-id-responses-bulk) resources will pull data in the form described on the SurveyMonkey API docs.
 
@@ -49,7 +50,7 @@ which is a human-readable form of the survey respondent's response to question. 
 
 3.  Set up your config file.
 
-    An example config file is provided in `sample_config.json`, the access token and survey in that file are invalid, and will error out. Replace them with your own valid ones.
+    An example config file is provided in `sample_config.json`, the access token is invalid, and will error out. Replace it with your own valid one.
 
 4.  Run the tap in discovery mode to get catalog.json file.
 
@@ -91,13 +92,13 @@ which is a human-readable form of the survey respondent's response to question. 
 | Config property    | Required  | Description
 | ------------------ | --------- | --------------
 | `access_token`     | Yes       | See https://developer.surveymonkey.com/api/v3/#oauth-2-0-flow
-| `start_date`       | No        | For streams with replication method `INCREMENTAL` the start date time to be used
+| `start_date`       | Yes        | For streams with replication method `INCREMENTAL` the start date time to be used
 | `page_size`        | No, default `"50"` | The page size for paginated streams
 | `survey_id`        | No        | In case you just want to get data for just one survey. Does not work with stream `surveys`.
 
 ## Streams
 
-### survey_details
+### surveys
 
 -   Endpoint: https://api.surveymonkey.com/v3/surveys
 -   Primary keys: id
@@ -106,21 +107,21 @@ which is a human-readable form of the survey respondent's response to question. 
 
 ### survey_details
 
--   Endpoint: https://api.surveymonkey.com/v3/surveys/[survey_id]/detail
+-   Endpoint: https://api.surveymonkey.com/v3/surveys/[survey_id]
 -   Primary keys: id
 -   Replication strategy: INCREMENTAL
     -   Bookmark: date_modified (date-time)
 
 ### responses
 
--   Endpoint: https://api.surveymonkey.com/v3/surveys/[survey_id]/detail
+-   Endpoint: https://api.surveymonkey.com/v3/surveys/[survey_id]/responses/bulk
 -   Primary keys: id
 -   Replication strategy: INCREMENTAL
     -   Bookmark: date_modified (date-time)
 
 ### simplified_responses
 
--   Endpoint: https://api.surveymonkey.com/v3/surveys/[survey_id]/detail
+-   Endpoint: https://api.surveymonkey.com/v3/surveys/[survey_id]/responses/bulk
 -   Primary keys: id
 -   Replication strategy: INCREMENTAL
     -   Bookmark: date_modified (date-time)
@@ -142,4 +143,3 @@ tap-surveymonkey --config tap_config.json --catalog catalog.json | singer-check-
 ---
 
 Copyright &copy; 2019 Stitch
-Copyright &copy; 2021 Horze International GmbH

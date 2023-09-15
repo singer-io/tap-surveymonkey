@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
+# pylint: disable=E1111
 import singer
 
 from tap_surveymonkey.discover import discover
 from tap_surveymonkey.sync import sync
 
 
-REQUIRED_CONFIG_KEYS = ["access_token"]
+REQUIRED_CONFIG_KEYS = ["start_date", "access_token"]
 LOGGER = singer.get_logger()
 
 
