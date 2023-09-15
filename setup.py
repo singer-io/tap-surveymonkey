@@ -10,7 +10,7 @@ setup(
     classifiers=["Programming Language :: Python :: 3 :: Only"],
     py_modules=["tap_surveymonkey"],
     install_requires=[
-        "singer-python==5.9.1",
+        "singer-python==5.13.0",
         "requests==2.22.0",
     ],
     extras_require={
