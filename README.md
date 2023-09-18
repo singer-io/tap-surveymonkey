@@ -39,7 +39,7 @@ which is a human-readable form of the survey respondent's response to question. 
     We recommend using a virtualenv:
 
     ```
-    python3 -m venv venv
+    python3 -m venv ./venv
     source venv/bin/activate
     pip install -e .
     ```
@@ -50,7 +50,7 @@ which is a human-readable form of the survey respondent's response to question. 
 
 3.  Set up your config file.
 
-    An example config file is provided in `sample_config.json`, the access token is invalid, and will error out. Replace it with your own valid one.
+    An example config file is provided in `sample_config.json`, the access token and survey in that file are invalid, and will error out. Replace them with your own valid ones.
 
 4.  Run the tap in discovery mode to get catalog.json file.
 
