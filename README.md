@@ -39,8 +39,8 @@ which is a human-readable form of the survey respondent's response to question. 
     We recommend using a virtualenv:
 
     ```
-    python3 -m venv ./venv
-    source venv/bin/activate
+    python3 -m venv ~/.virtualenvs/tap-surveymonkey
+    source ~/.virtualenvs/tap-surveymonkey/bin/activate
     pip install -e .
     ```
 
