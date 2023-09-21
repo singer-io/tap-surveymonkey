@@ -21,6 +21,7 @@ def build_bookmark_key_prefix(parent_row, parent_stream_object):
 def sync(config, state, catalog):
     """ Sync data from tap source """
     access_token = config['access_token']
+    survey_id = config.get('survey_id')
     client = SurveyMonkeyClient(access_token)
 
     # Loop over selected streams in catalog
@@ -45,54 +46,46 @@ def sync(config, state, catalog):
             bookmark_value = None
             bookmark_key_prefix = ''
             with Transformer() as transformer:
-                if stream_object.replication_key_from_parent:
-                    if bookmarks.get_bookmark(state, stream_object.stream_id, 'page_sync'):
-                        bookmark_value = bookmarks.get_bookmark(state, stream_object.stream_id, 'page_sync')
 
-                    if bookmarks.get_bookmark(state, stream_object.stream_id, 'full_sync'):
-                        bookmark_value = bookmarks.get_bookmark(state, stream_object.stream_id, 'full_sync')
+                for parent_row in stream_object.parent_stream.fetch_data(client, None, config, state, bookmark_value) if stream_object.parent_stream else [{}]:
+                    if stream_object.replication_key_from_parent:
+                        if bookmarks.get_bookmark(state, stream_object.stream_id, survey_id) and survey_id:
+                            bookmark_value = bookmarks.get_bookmark(state, stream_object.stream_id, survey_id)
 
-                for parent_row in stream_object.parent_stream.fetch_data(client, None, config, state, bookmark_value=bookmark_value) if stream_object.parent_stream else [{}]:
-                    bookmark_value = None
-
-                    if not stream_object.replication_key_from_parent:
+                        elif bookmarks.get_bookmark(state, stream_object.stream_id, 'full_sync') and not survey_id:
+                            bookmark_value = bookmarks.get_bookmark(state, stream_object.stream_id, 'full_sync')                 
+                    else :
                         bookmark_key_prefix = build_bookmark_key_prefix(parent_row, stream_object.parent_stream)
 
-                        if bookmarks.get_bookmark(state, stream_object.stream_id, 'page_sync'):
+                        if bookmarks.get_bookmark(state, stream_object.stream_id, f'{bookmark_key_prefix}page_sync'):
                             bookmark_value = bookmarks.get_bookmark(state, stream_object.stream_id, f'{bookmark_key_prefix}page_sync')
 
-                        if bookmarks.get_bookmark(state, stream_object.stream_id, 'full_sync'):
-                            bookmark_value = bookmarks.get_bookmark(state, stream_object.stream_id, f'{bookmark_key_prefix}full_sync')
+                        elif bookmarks.get_bookmark(state, stream_object.stream_id, 'full_sync') and not survey_id:
+                            bookmark_value = bookmarks.get_bookmark(state, stream_object.stream_id, f'full_sync')
 
                     for row in stream_object.fetch_data(client, stream, config, state, parent_row=parent_row, bookmark_value=bookmark_value):
                         # write one or more rows to the stream:
-                        singer.write_record(stream.tap_stream_id, transformer.transform(row, raw_schema, mdata))
-
+                        row_brk_value = None
+                        if bookmark_value and row[bookmark_column] >= bookmark_value:
+                            singer.write_record(stream.tap_stream_id, transformer.transform(row, raw_schema, mdata))
+                            row_brk_value = row[bookmark_column]
+                            counter.increment()
                         if bookmark_column and not stream_object.replication_key_from_parent:
-                            if is_sorted:
+                            if is_sorted and stream.tap_stream_id != 'surveys':
                                 # update bookmark to latest value
                                 state = bookmarks.write_bookmark(state, stream.tap_stream_id, f'{bookmark_key_prefix}page_sync', row[bookmark_column])
                                 singer.write_state(state)
-                            else:
-                                # if data unsorted, save max value until end of writes
-                                max_bookmark = max(max_bookmark, row[bookmark_column])
-                        
-                        counter.increment()
+                            max_bookmark = max(max_bookmark, row[bookmark_column]) if max_bookmark else row[bookmark_column]
 
-                    if bookmark_column and parent_row and stream_object.replication_key_from_parent:
+                    if row_brk_value and parent_row and stream_object.replication_key_from_parent:
                         if is_sorted:
                             # update bookmark to latest value
-                            state = bookmarks.write_bookmark(state, stream.tap_stream_id, f'{bookmark_key_prefix}page_sync', parent_row[bookmark_column])
+                            state = bookmarks.write_bookmark(state, stream.tap_stream_id, parent_row['id'], parent_row.get(bookmark_column, row_brk_value))
                             singer.write_state(state)
-                        else:
-                            # if data unsorted, save max value until end of writes
-                            max_bookmark = max(max_bookmark, parent_row[bookmark_column])
-                if bookmark_column and not is_sorted:
-                    state = bookmarks.write_bookmark(state, stream.tap_stream_id, f'{bookmark_key_prefix}full_sync', row[bookmark_column])
-                    singer.write_state(state)
+                        max_bookmark = max(max_bookmark, parent_row.get(bookmark_column, row_brk_value)) if max_bookmark else parent_row.get(bookmark_column, row_brk_value)
 
-            if bookmark_column and not is_sorted and parent_row and stream_object.replication_key_from_parent:
-                state = bookmarks.write_bookmark(state, stream.tap_stream_id, f'{bookmark_key_prefix}full_sync', parent_row[bookmark_column])
+            if not survey_id or stream.tap_stream_id == 'surveys':
+                state = bookmarks.write_bookmark(state, stream.tap_stream_id, f'full_sync', max_bookmark)
                 singer.write_state(state)
 
-        LOGGER.info('Stream: {}, Processed {} records'.format(stream.tap_stream_id, counter.value))
+            LOGGER.info('Stream: {}, Processed {} records.'.format(stream.tap_stream_id, counter.value))

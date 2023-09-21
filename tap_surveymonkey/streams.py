@@ -194,8 +194,9 @@ class Surveys(PaginatedStream):
         if not bookmark_value and config.get('start_date'):
             bookmark_value = config['start_date']
 
-        if bookmark_value:
-            params.update({'start_modified_at': bookmark_value})
+        elif bookmark_value:
+            bookmark_value_minus_1_min = (datetime.datetime.strptime(bookmark_value, DATETIME_FMT_MAC) - datetime.timedelta(minutes = 1)).strftime(DATETIME_FMT_MAC)
+            params.update({'start_modified_at': bookmark_value_minus_1_min})
 
         return params
 
