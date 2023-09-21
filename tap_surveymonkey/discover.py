@@ -16,9 +16,9 @@ def load_schema(tap_stream_id):
 
 
 def discover():
-    '''
+    """
     Run discovery mode
-    '''
+    """
     streams = []
 
     for stream_id, stream_object in STREAMS.items():
@@ -35,7 +35,7 @@ def discover():
 
         # make sure that the replication key field is mandatory
         if stream_object.replication_key:
-            metadata.write(mdata, ('properties', stream_object.replication_key), 'inclusion', 'automatic')
+            metadata.write(mdata, ("properties", stream_object.replication_key), "inclusion", "automatic")
 
         streams.append(CatalogEntry(
             stream=stream_id,

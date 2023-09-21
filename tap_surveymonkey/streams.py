@@ -30,29 +30,29 @@ def strptime(dtime):
 
 def find_max_timestamp(state, stream_id):
     max_time = pytz.utc.localize(datetime.datetime.min)
-    for _, last_modified in state['bookmarks'].get(stream_id, {}).items():
+    for _, last_modified in state["bookmarks"].get(stream_id, {}).items():
         if max_time < pytz.utc.localize(strptime(last_modified)):
             max_time = pytz.utc.localize(strptime(last_modified))
     return max_time
 
 
 def patch_time_str(obj_dict):
-    # The target expects [yyyy-MM-dd'T'HH:mm:ssZ, yyyy-MM-dd'T'HH:mm:ss.[0-9]{1,9}Z] only
-    if obj_dict.get('date_modified'):
-        time_obj = singer.utils.strptime_to_utc(obj_dict['date_modified'])
+    # The target expects [yyyy-MM-dd"T"HH:mm:ssZ, yyyy-MM-dd"T"HH:mm:ss.[0-9]{1,9}Z] only
+    if obj_dict.get("date_modified"):
+        time_obj = singer.utils.strptime_to_utc(obj_dict["date_modified"])
         time_str = singer.utils.strftime(time_obj)
-        obj_dict['date_modified'] = time_str
-    if obj_dict.get('date_created'):
-        time_obj = singer.utils.strptime_to_utc(obj_dict['date_created'])
+        obj_dict["date_modified"] = time_str
+    if obj_dict.get("date_created"):
+        time_obj = singer.utils.strptime_to_utc(obj_dict["date_created"])
         time_str = singer.utils.strftime(time_obj)
-        obj_dict['date_created'] = time_str
+        obj_dict["date_created"] = time_str
 
 
 class Stream:
     key_properties = None
     replication_method = None
     replication_key = None
-    replication_key_from_parent = False # for streams which just return a single record and iterate by its parent, e.g. 'SurveyDetails'
+    replication_key_from_parent = False # for streams which just return a single record and iterate by its parent, e.g. "SurveyDetails"
     is_sorted = False # indicate whether data is sorted ascending on bookmark value
     mandatory_properties = []
 
@@ -72,12 +72,12 @@ class Stream:
         path = self.path
         if parent_row:
             for key, value in parent_row.items():
-                path = path.replace(f'{{parent_{key}}}', value)
+                path = path.replace(f"{{parent_{key}}}", value)
 
         resp = client.make_request(path, params=None, state=state)
         if not resp:
             raise Exception("Resource not found")
-        if resp.get('error'):
+        if resp.get("error"):
             raise Exception(resp)
 
         self._modify_record(resp)
@@ -87,12 +87,12 @@ class Stream:
 class PaginatedStream(Stream):
     def get_params(self, stream, config, state, bookmark_value):
         return {
-            'per_page': int(config.get('page_size', DEFAULT_PAGE_SIZE)),
-            'page': 1
+            "per_page": int(config.get("page_size", DEFAULT_PAGE_SIZE)),
+            "page": 1
         }
 
     def format_response(self, response):
-        return response.get('data')
+        return response.get("data")
 
     def fetch_data(self, client: SurveyMonkeyClient, stream, config, state, parent_row=None, bookmark_value=None):
         params = self.get_params(stream, config, state, bookmark_value)
@@ -104,12 +104,12 @@ class PaginatedStream(Stream):
             path = self.path
             if parent_row:
                 for key, value in parent_row.items():
-                    path = path.replace(f'{{parent_{key}}}', value)
+                    path = path.replace(f"{{parent_{key}}}", value)
 
             resp = client.make_request(path, params=params, state=state)
             if not resp:
                 raise Exception("Resource not found")
-            if resp.get('error'):
+            if resp.get("error"):
                 raise Exception(resp)
 
             raw_records = self.format_response(resp)
@@ -118,67 +118,67 @@ class PaginatedStream(Stream):
                 self._modify_record(raw_record)
                 yield raw_record
 
-            if not resp['links'].get('next'):
+            if not resp["links"].get("next"):
                 break
 
             page += 1
-            params.update({'page': page})
+            params.update({"page": page})
 
 
 class SurveyStream(PaginatedStream):
-    key_properties = ['id']
+    key_properties = ["id"]
 
     def get_params(self, stream, config, state, bookmark_value):
         params = super().get_params(stream, config, state, bookmark_value)
 
         params.update(
             {
-                'sort_by': 'date_modified',
-                'sort_order': 'ASC',
-                'include': 'date_modified'
+                "sort_by": "date_modified",
+                "sort_order": "ASC",
+                "include": "date_modified"
             })
 
-        if not bookmark_value and config.get('start_date'):
-            bookmark_value = config['start_date']
+        if not bookmark_value and config.get("start_date"):
+            bookmark_value = config["start_date"]
 
         if bookmark_value:
-            params.update({'start_modified_at': bookmark_value})
+            params.update({"start_modified_at": bookmark_value})
 
         return params
 
     def fetch_data(self, client: SurveyMonkeyClient, stream, config, state, parent_row=None, bookmark_value=None):
-        survey_id = config.get('survey_id')
+        survey_id = config.get("survey_id")
         if survey_id:
-            yield {'id': survey_id}
+            yield {"id": survey_id}
         else:
             for survey_raw_record in super().fetch_data(client, None, config, state):
                 yield survey_raw_record
 
 
 class Surveys(PaginatedStream):
-    key_properties = ['id']
-    replication_method = 'INCREMENTAL'
-    replication_key = 'date_modified'
+    key_properties = ["id"]
+    replication_method = "INCREMENTAL"
+    replication_key = "date_modified"
     is_sorted = True
 
     OPTIONAL_INCLUDE_FIELDS = [
-        'response_count',
-        'date_created',
-        'date_modified',
-        'language',
-        'question_count'
+        "response_count",
+        "date_created",
+        "date_modified",
+        "language",
+        "question_count"
     ]
 
     def get_params(self, stream, config, state, bookmark_value):
         params = super().get_params(stream, config, state, bookmark_value=None)
-        include_list = params['include'].split(',') if 'include' in params else []
+        include_list = params["include"].split(",") if "include" in params else []
 
-        include_list.append('date_modified')
+        include_list.append("date_modified")
 
         # add optional fields
         mdata = metadata.to_map(stream.metadata)
         for optional_field in self.OPTIONAL_INCLUDE_FIELDS:
-            if metadata.get(mdata, ('properties', optional_field), 'selected'):
+            if metadata.get(mdata, ("properties", optional_field), "selected"):
                 include_list.append(optional_field)
 
         # remove duplicates
@@ -186,17 +186,17 @@ class Surveys(PaginatedStream):
 
         params.update(
             {
-                'sort_by': 'date_modified',
-                'sort_order': 'ASC',
-                'include': ','.join(include_list)
+                "sort_by": "date_modified",
+                "sort_order": "ASC",
+                "include": ",".join(include_list)
             })
 
-        if not bookmark_value and config.get('start_date'):
-            bookmark_value = config['start_date']
+        if not bookmark_value and config.get("start_date"):
+            bookmark_value = config["start_date"]
 
         elif bookmark_value:
             bookmark_value_minus_1_min = (datetime.datetime.strptime(bookmark_value, DATETIME_FMT_MAC) - datetime.timedelta(minutes = 1)).strftime(DATETIME_FMT_MAC)
-            params.update({'start_modified_at': bookmark_value_minus_1_min})
+            params.update({"start_modified_at": bookmark_value_minus_1_min})
 
         return params
 
@@ -207,9 +207,9 @@ class Surveys(PaginatedStream):
 
 
 class SurveyDetails(Stream):
-    key_properties = ['id']
-    replication_method = 'INCREMENTAL'
-    replication_key = 'date_modified'
+    key_properties = ["id"]
+    replication_method = "INCREMENTAL"
+    replication_key = "date_modified"
     replication_key_from_parent = True
     is_sorted = True
 
@@ -220,9 +220,9 @@ class SurveyDetails(Stream):
 
 
 class Responses(PaginatedStream):
-    key_properties = ['id']
-    replication_method = 'INCREMENTAL'
-    replication_key = 'date_modified'
+    key_properties = ["id"]
+    replication_method = "INCREMENTAL"
+    replication_key = "date_modified"
     is_sorted = True
 
     def __init__(self, stream_id: str, path: str, parent_stream, simple: bool = False):
@@ -234,15 +234,15 @@ class Responses(PaginatedStream):
 
         params.update(
             {
-                'sort_by': 'date_modified',
-                'sort_order': 'ASC'
+                "sort_by": "date_modified",
+                "sort_order": "ASC"
             })
 
-        if not bookmark_value and config.get('start_date'):
-            bookmark_value = config['start_date']
+        if not bookmark_value and config.get("start_date"):
+            bookmark_value = config["start_date"]
 
         if bookmark_value:
-            params.update({'start_modified_at': bookmark_value})
+            params.update({"start_modified_at": bookmark_value})
 
         return params
 
@@ -253,29 +253,29 @@ class Responses(PaginatedStream):
 
 
 STREAMS = {
-    'surveys': Surveys(
-        stream_id='surveys',
-        path='surveys'),
-    'survey_details': SurveyDetails(
-        stream_id='survey_details',
-        path='surveys/{parent_id}/details',
+    "surveys": Surveys(
+        stream_id="surveys",
+        path="surveys"),
+    "survey_details": SurveyDetails(
+        stream_id="survey_details",
+        path="surveys/{parent_id}/details",
         parent_stream=SurveyStream(
             stream_id=None,
-            path='surveys'
+            path="surveys"
         )),
-    'responses': Responses(
-        stream_id='responses',
-        path='surveys/{parent_id}/responses/bulk',
+    "responses": Responses(
+        stream_id="responses",
+        path="surveys/{parent_id}/responses/bulk",
         parent_stream=SurveyStream(
             stream_id=None,
-            path='surveys'
+            path="surveys"
         )),
-    'simplified_responses': Responses(
-        stream_id='simplified_responses',
-        path='surveys/{parent_id}/responses/bulk',
+    "simplified_responses": Responses(
+        stream_id="simplified_responses",
+        path="surveys/{parent_id}/responses/bulk",
         parent_stream=SurveyStream(
             stream_id=None,
-            path='surveys'
+            path="surveys"
         ),
         simple=True),
 }
