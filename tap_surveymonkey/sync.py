@@ -68,7 +68,7 @@ def sync(config, state, catalog):
                         max_bookmark = max(max_bookmark, parent_row.get(bookmark_column, row_brk_value)) if max_bookmark else parent_row.get(bookmark_column, row_brk_value)
 
             if not survey_id or stream.tap_stream_id == "surveys":
-                state = bookmarks.write_bookmark(state, stream.tap_stream_id, f"full_sync", max_bookmark)
+                state = bookmarks.write_bookmark(state, stream.tap_stream_id, "full_sync", max_bookmark)
                 singer.write_state(state)
 
             LOGGER.info("Stream: {}, Processed {} records.".format(stream.tap_stream_id, counter.value))
