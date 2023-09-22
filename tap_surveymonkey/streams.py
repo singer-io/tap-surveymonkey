@@ -1,7 +1,7 @@
 import datetime
 import pytz
 import singer.utils
-from singer import bookmarks, metadata
+from singer import metadata
 
 from tap_surveymonkey.client import SurveyMonkeyClient
 
