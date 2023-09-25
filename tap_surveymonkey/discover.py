@@ -1,10 +1,7 @@
 import os
 from singer import utils
-from singer.catalog import Catalog, CatalogEntry, Schema
-from singer import metadata
-import json
-from singer import metadata
 from singer.catalog import Catalog
+from singer import metadata
 from tap_surveymonkey.streams import STREAMS
 
 
@@ -22,20 +19,17 @@ def get_schemas():
     for stream_name, stream_object in STREAMS.items():
 
         schema_path = get_abs_path(f"schemas/{stream_name}.json")
-        with open(schema_path) as file:
-            schema = json.load(file)
+        schema = utils.load_json(schema_path)
 
         if stream_object.replication_method == "INCREMENTAL":
             replication_keys = [stream_object.replication_key]
         else:
             replication_keys = None
 
-        meta = metadata.get_standard_metadata(schema=schema,
+        meta = metadata.to_map(metadata.get_standard_metadata(schema=schema,
                                               key_properties=stream_object.key_properties,
                                               replication_method=stream_object.replication_method,
-                                              valid_replication_keys=replication_keys,)
-
-        meta = metadata.to_map(meta)
+                                              valid_replication_keys=replication_keys,))
 
         if replication_keys:
             for replication_key in replication_keys:
