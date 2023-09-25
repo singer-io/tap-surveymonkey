@@ -18,8 +18,7 @@ def main():
 
     # If discover flag was passed, run discovery mode
     if args.discover:
-        catalog = discover()
-        print(json.dumps(catalog, indent=2))
+        catalog = discover().dump()
     # Otherwise run in sync mode
     else:
         if args.catalog:
