@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # pylint: disable=E1111
+import json
 import singer
 
 from tap_surveymonkey.discover import discover
@@ -17,7 +18,8 @@ def main():
 
     # If discover flag was passed, run discovery mode
     if args.discover:
-        catalog = discover().dump()
+        catalog = discover()
+        print(json.dumps(catalog, indent=2))
     # Otherwise run in sync mode
     else:
         if args.catalog:
