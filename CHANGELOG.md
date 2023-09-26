@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.0
+  * Add new stream `surveys` to fetch all the surveys data [#24](https://github.com/singer-io/tap-surveymonkey/pull/24)
+  * Add support to extract survey_details, responses and simplified_responses data with/without survey_id
+  * Schema updates
+  * Upgrade singer-python version to 5.13.0
+
 ## 1.0.1
   * Add layout to Question object schema
   * Set `additionalProperties` to true on all schemas
