@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="tap-surveymonkey",
-    version="1.0.1",
+    version="1.0.2",
     description="Singer.io tap for extracting data",
     author="Stitch",
     url="http://singer.io",
@@ -11,12 +11,12 @@ setup(
     py_modules=["tap_surveymonkey"],
     install_requires=[
         "singer-python==5.6.0",
-        "requests==2.22.0",
+        "requests==2.31.0",
     ],
     extras_require={
         'dev': [
-            'ipdb==0.11',
-            'pylint==2.4.4',
+            'ipdb',
+            'pylint',
         ]
     },
     entry_points="""
