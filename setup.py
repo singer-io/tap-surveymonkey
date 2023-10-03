@@ -17,6 +17,7 @@ setup(
         'dev': [
             'ipdb',
             'pylint',
+            'urllib3==1.26.15'
         ]
     },
     entry_points="""
