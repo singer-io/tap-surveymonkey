@@ -1,6 +1,6 @@
 {
     "type": "object",
-    "additionalProperties": true,
+    "additionalProperties": false,
     "properties": {
         "total_time": {
             "type": "integer"
@@ -134,7 +134,10 @@
             }
         },
         "quiz_results": {
-            "type": "object",
+            "type": [
+                "null",
+                "object"
+            ],
             "additionalProperties": true,
             "properties": {
                 "correct": {
