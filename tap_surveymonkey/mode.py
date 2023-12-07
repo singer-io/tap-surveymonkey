@@ -211,7 +211,7 @@ def sync_responses(config, state, simplify=False):
                 continue
 
             patch_time_str(response)
-
+            LOGGER.info("records responses 66666666666666666666: %s",response)
             singer.write_records(stream_id,
                                  [response]
                                  )
