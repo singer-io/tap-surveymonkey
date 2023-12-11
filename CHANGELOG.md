@@ -1,7 +1,7 @@
 # Changelog
 
 ## 2.0.1
-  * changes to get `heading` field in response for `simplified_responses` stream [#29](https://github.com/singer-io/tap-surveymonkey/pull/29)
+  * Get `heading` field in response for `simplified_responses` stream [#29](https://github.com/singer-io/tap-surveymonkey/pull/29)
 
 ## 2.0.0
   * Add new stream `surveys` to fetch all the surveys data [#24](https://github.com/singer-io/tap-surveymonkey/pull/24)
