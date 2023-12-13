@@ -231,6 +231,8 @@ class Responses(PaginatedStream):
 
     def get_params(self, stream, config, state, bookmark_value):
         params = super().get_params(stream, config, state, bookmark_value=None)
+        if self.simple:
+            params["simple"] = True
 
         params.update(
             {
