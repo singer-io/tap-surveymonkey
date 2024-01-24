@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.1.0
+  * Updates to run on python 3.11 [#30](https://github.com/singer-io/tap-surveymonkey/pull/30)
+
 ## 2.0.1
   * Get `heading` field in response for `simplified_responses` stream [#29](https://github.com/singer-io/tap-surveymonkey/pull/29)
 
