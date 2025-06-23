@@ -1,8 +1,8 @@
 # Changelog
 
 ## 2.1.1
-  * Updates requests to 2.32.4
-  * Updates singer-python to 6.0.1
+  * Updates requests to 2.32.4 [#35](https://github.com/singer-io/tap-surveymonkey/pull/35)
+  * Updates singer-python to 6.0.1 [#35](https://github.com/singer-io/tap-surveymonkey/pull/35)
 
 ## 2.1.0
   * Updates to run on python 3.11 [#30](https://github.com/singer-io/tap-surveymonkey/pull/30)
