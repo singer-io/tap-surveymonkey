@@ -15,6 +15,7 @@ def get_schemas():
 
     schemas = {}
     schemas_metadata = {}
+    schema_key_properties = {}
 
     for stream_name, stream_object in STREAMS.items():
 
@@ -42,8 +43,9 @@ def get_schemas():
 
         schemas[stream_name] = schema
         schemas_metadata[stream_name] = meta
+        schema_key_properties[stream_name] = stream_object.key_properties
 
-    return schemas, schemas_metadata
+    return schemas, schemas_metadata, schema_key_properties
 
 
 def discover():
@@ -51,18 +53,20 @@ def discover():
     Builds the singer catalog for all the streams in the schemas directory.
     """
 
-    schemas, schemas_metadata = get_schemas()
+    schemas, schemas_metadata, schema_key_properties = get_schemas()
     streams = []
 
 
     for schema_name, schema in schemas.items():
         schema_meta = schemas_metadata[schema_name]
+        key_properties = schema_key_properties[schema_name]
 
         catalog_entry = {
             "stream": schema_name,
             "tap_stream_id": schema_name,
             "schema": schema,
             "metadata": schema_meta,
+            "key_properties": key_properties
         }
 
         streams.append(catalog_entry)
