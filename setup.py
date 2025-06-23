@@ -3,15 +3,15 @@ from setuptools import setup
 
 setup(
     name="tap-surveymonkey",
-    version="2.1.0",
+    version="2.1.1",
     description="Singer.io tap for extracting data",
     author="Stitch",
     url="http://singer.io",
     classifiers=["Programming Language :: Python :: 3 :: Only"],
     py_modules=["tap_surveymonkey"],
     install_requires=[
-        "singer-python==6.0.0",
-        "requests==2.31.0",
+        "singer-python==6.0.1",
+        "requests==2.32.4",
     ],
     extras_require={
         'dev': [
