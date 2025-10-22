@@ -1,7 +1,7 @@
 # Changelog
 
 ## 2.2.0
-  * Adding Parent relationship to child streams [#38](https://github.com/singer-io/tap-surveymonkey/pull/38)
+  * Adding Parent relationship to child streams [#39](https://github.com/singer-io/tap-surveymonkey/pull/39)
 
 ## 2.1.1
   * Updates requests to 2.32.4 [#35](https://github.com/singer-io/tap-surveymonkey/pull/35)
