@@ -18,6 +18,11 @@ setup(
             'ipdb',
             'pylint',
             'urllib3==1.26.15'
+        ],
+        'test': [
+            'pytest==6.0.0',
+            'pytest-cov==2.10.0',
+            'coverage==5.3'
         ]
     },
     entry_points="""
