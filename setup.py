@@ -10,14 +10,14 @@ setup(
     classifiers=["Programming Language :: Python :: 3 :: Only"],
     py_modules=["tap_surveymonkey"],
     install_requires=[
-        "singer-python==6.0.1",
-        "requests==2.32.4",
+        "singer-python==6.8.0",
+        "requests==2.33.0",
     ],
     extras_require={
         'dev': [
             'ipdb',
             'pylint',
-            'urllib3==1.26.15'
+            'urllib3==2.6.3'
         ]
     },
     entry_points="""
