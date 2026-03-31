@@ -1,6 +1,5 @@
 import os
 import unittest
-from unittest.mock import patch, MagicMock
 
 from singer.catalog import Catalog
 from singer import metadata

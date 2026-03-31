@@ -1,8 +1,6 @@
 import unittest
 from unittest.mock import patch, MagicMock
 
-import requests
-
 from tap_surveymonkey.client import SurveyMonkeyClient
 
 
