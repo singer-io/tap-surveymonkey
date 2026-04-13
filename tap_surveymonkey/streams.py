@@ -152,7 +152,7 @@ class SurveyStream(PaginatedStream):
             yield {"id": survey_id}
         else:
             for survey_raw_record in super().fetch_data(client, None, config, state):
-                yield survey_raw_record
+                yield {"id": survey_raw_record["id"], "date_modified": survey_raw_record.get("date_modified")}
 
 
 class Surveys(PaginatedStream):
