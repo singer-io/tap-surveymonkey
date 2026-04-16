@@ -1,4 +1,5 @@
 import datetime
+import math
 import pytz
 import singer.utils
 from singer import metadata
@@ -16,6 +17,7 @@ SM_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S"
 SM_RESPONSE_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
 
 DEFAULT_PAGE_SIZE = "50"
+MAX_PAGE_LIMIT = 1000  # hard ceiling to prevent infinite loops
 
 
 def strptime(dtime):
@@ -97,9 +99,10 @@ class PaginatedStream(Stream):
     def fetch_data(self, client: SurveyMonkeyClient, stream, config, state, parent_row=None, bookmark_value=None):
         params = self.get_params(stream, config, state, bookmark_value)
         page = 1
-        while True:
+        max_pages = MAX_PAGE_LIMIT  # updated after first response using total count
+        while page <= max_pages:
             if self.stream_id:
-                LOGGER.info("Fetching page {} for {}".format(page, self.stream_id))
+                LOGGER.info("Fetching page {} of {} for {}".format(page, max_pages, self.stream_id))
 
             path = self.path
             if parent_row:
@@ -111,6 +114,15 @@ class PaginatedStream(Stream):
                 raise Exception("Resource not found")
             if resp.get("error"):
                 raise Exception(resp)
+
+            # Derive a tight max_pages bound from the first response so the
+            # loop cannot run past the actual number of pages even if the API
+            # forgets to clear links.next on the final page.
+            if page == 1:
+                total = resp.get("total")
+                per_page = int(params.get("per_page", DEFAULT_PAGE_SIZE))
+                if total is not None and per_page > 0:
+                    max_pages = min(math.ceil(total / per_page), MAX_PAGE_LIMIT)
 
             raw_records = self.format_response(resp)
 

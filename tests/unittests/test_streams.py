@@ -15,6 +15,7 @@ from tap_surveymonkey.streams import (
     DATETIME_FMT,
     DATETIME_FMT_MAC,
     DATETIME_PARSE,
+    MAX_PAGE_LIMIT,
 )
 
 
@@ -197,6 +198,45 @@ class TestPaginatedStreamFetchData(unittest.TestCase):
                                          {"start_date": "2021-01-01T00:00:00Z"}, {}))
         self.assertEqual(len(results), 2)
         self.assertEqual(client.make_request.call_count, 2)
+
+    def test_max_pages_derived_from_total_in_first_response(self):
+        """fetch_data limits pages to ceil(total/per_page) even if links.next is never cleared."""
+        stream = self._make_paginated_stream()
+        client = MagicMock()
+        # total=2, per_page=1 → max_pages=2.  links.next is always set (bug simulation).
+        page_response = lambda record_id: {
+            "total": 2,
+            "data": [{"id": record_id}],
+            "links": {"next": "?page=next"},  # never cleared — would loop forever without fix
+        }
+        client.make_request.side_effect = [page_response("1"), page_response("2")]
+
+        results = list(stream.fetch_data(client, MagicMock(),
+                                         {"start_date": "2021-01-01T00:00:00Z", "page_size": "1"}, {}))
+
+        # Must stop after 2 pages (= ceil(2/1)) despite links.next always being present.
+        self.assertEqual(len(results), 2)
+        self.assertEqual(client.make_request.call_count, 2)
+
+    def test_hard_cap_prevents_runaway_loop_when_no_total(self):
+        """fetch_data stops at MAX_PAGE_LIMIT when total is absent and links.next never clears."""
+        stream = self._make_paginated_stream()
+        client = MagicMock()
+        # API returns no total and links.next always set — worst-case scenario.
+        always_next = {"data": [{"id": "x"}], "links": {"next": "?page=next"}}
+        # Use a patched MAX_PAGE_LIMIT of 3 to keep the test fast.
+        import tap_surveymonkey.streams as streams_mod
+        original = streams_mod.MAX_PAGE_LIMIT
+        try:
+            streams_mod.MAX_PAGE_LIMIT = 3
+            client.make_request.return_value = always_next
+            results = list(stream.fetch_data(client, MagicMock(),
+                                             {"start_date": "2021-01-01T00:00:00Z"}, {}))
+        finally:
+            streams_mod.MAX_PAGE_LIMIT = original
+
+        self.assertEqual(client.make_request.call_count, 3)
+        self.assertEqual(len(results), 3)
 
 
 class TestStreamFetchData(unittest.TestCase):
