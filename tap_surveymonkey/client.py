@@ -94,7 +94,7 @@ class SurveyMonkeyClient:
             )
 
         # Any other non-2xx status code — map to the appropriate exception.
-        if not resp.ok:
+        if not (200 <= resp.status_code < 300):
             exc_class = ERROR_CODE_EXCEPTION_MAPPING.get(resp.status_code, SurveyMonkeyError)
             try:
                 error_body = resp.json()
