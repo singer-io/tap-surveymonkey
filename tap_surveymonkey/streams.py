@@ -1,5 +1,4 @@
 import datetime
-import math
 import pytz
 import singer.utils
 from singer import metadata
@@ -114,15 +113,6 @@ class PaginatedStream(Stream):
                 raise Exception("Resource not found")
             if resp.get("error"):
                 raise Exception(resp)
-
-            # Derive a tight max_pages bound from the first response so the
-            # loop cannot run past the actual number of pages even if the API
-            # forgets to clear links.next on the final page.
-            if page == 1:
-                total = resp.get("total")
-                per_page = int(params.get("per_page", DEFAULT_PAGE_SIZE))
-                if total is not None and per_page > 0:
-                    max_pages = min(math.ceil(total / per_page), MAX_PAGE_LIMIT)
 
             raw_records = self.format_response(resp)
 
