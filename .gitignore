@@ -103,3 +103,4 @@ tags
 singer-check-tap-data
 state.json
 .vscode/*
+tmp/

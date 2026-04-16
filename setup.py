@@ -12,6 +12,7 @@ setup(
     install_requires=[
         "singer-python==6.8.0",
         "requests==2.33.0",
+        "backoff==1.8.0",
     ],
     extras_require={
         'dev': [
