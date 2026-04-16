@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.0
+  * Upgrade Python version to 3.12
+  * Unit tests and Integration tests
+
 ## 2.1.1
   * Updates requests to 2.32.4 [#35](https://github.com/singer-io/tap-surveymonkey/pull/35)
   * Updates singer-python to 6.0.1 [#35](https://github.com/singer-io/tap-surveymonkey/pull/35)
