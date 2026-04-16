@@ -98,7 +98,7 @@ class PaginatedStream(Stream):
     def fetch_data(self, client: SurveyMonkeyClient, stream, config, state, parent_row=None, bookmark_value=None):
         params = self.get_params(stream, config, state, bookmark_value)
         page = 1
-        max_pages = MAX_PAGE_LIMIT  # updated after first response using total count
+        max_pages = MAX_PAGE_LIMIT
         while page <= max_pages:
             if self.stream_id:
                 LOGGER.info("Fetching page {} of {} for {}".format(page, max_pages, self.stream_id))
