@@ -15,7 +15,6 @@ from tap_surveymonkey.streams import (
     DATETIME_FMT,
     DATETIME_FMT_MAC,
     DATETIME_PARSE,
-    MAX_PAGE_LIMIT,
 )
 
 
@@ -214,11 +213,11 @@ class TestPaginatedStreamFetchData(unittest.TestCase):
         self.assertEqual(len(results), 2)
         self.assertEqual(client.make_request.call_count, 2)
 
-    def test_hard_cap_prevents_runaway_loop_when_no_total(self):
-        """fetch_data stops at MAX_PAGE_LIMIT when total is absent and links.next never clears."""
+    def test_hard_cap_raises_when_links_next_still_present(self):
+        """fetch_data raises an exception when the page cap is hit but links.next is still present."""
         stream = self._make_paginated_stream()
         client = MagicMock()
-        # API returns no total and links.next always set — worst-case scenario.
+        # API returns no total and links.next always set — worst-case runaway scenario.
         always_next = {"data": [{"id": "x"}], "links": {"next": "?page=next"}}
         # Use a patched MAX_PAGE_LIMIT of 3 to keep the test fast.
         import tap_surveymonkey.streams as streams_mod
@@ -226,13 +225,30 @@ class TestPaginatedStreamFetchData(unittest.TestCase):
         try:
             streams_mod.MAX_PAGE_LIMIT = 3
             client.make_request.return_value = always_next
-            results = list(stream.fetch_data(client, MagicMock(),
-                                             {"start_date": "2021-01-01T00:00:00Z"}, {}))
+            with self.assertRaises(Exception) as ctx:
+                list(stream.fetch_data(client, MagicMock(),
+                                       {"start_date": "2021-01-01T00:00:00Z"}, {}))
         finally:
             streams_mod.MAX_PAGE_LIMIT = original
 
+        self.assertIn("Pagination cap", str(ctx.exception))
+        self.assertIn("links.next", str(ctx.exception))
+        # All 3 capped pages must have been fetched before the error is raised.
         self.assertEqual(client.make_request.call_count, 3)
-        self.assertEqual(len(results), 3)
+
+    def test_hard_cap_configurable_via_config(self):
+        """max_page_limit in config overrides the module-level MAX_PAGE_LIMIT."""
+        stream = self._make_paginated_stream()
+        client = MagicMock()
+        always_next = {"data": [{"id": "x"}], "links": {"next": "?page=next"}}
+        client.make_request.return_value = always_next
+        # A cap of 2 supplied via config should be respected.
+        with self.assertRaises(Exception) as ctx:
+            list(stream.fetch_data(client, MagicMock(),
+                                   {"start_date": "2021-01-01T00:00:00Z", "max_page_limit": "2"}, {}))
+
+        self.assertIn("Pagination cap", str(ctx.exception))
+        self.assertEqual(client.make_request.call_count, 2)
 
 
 class TestStreamFetchData(unittest.TestCase):

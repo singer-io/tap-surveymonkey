@@ -130,6 +130,7 @@ class TestGetRateLimitSleepSeconds(unittest.TestCase):
         self.assertEqual(_get_rate_limit_sleep_seconds(resp), 0)
 
     def test_missing_headers_returns_zero(self):
+        """Absent rate-limit headers default to -1 (not 0), so no sleep is triggered."""
         resp = self._resp({})
         self.assertEqual(_get_rate_limit_sleep_seconds(resp), 0)
 
@@ -211,14 +212,22 @@ class TestClientRateLimiting(unittest.TestCase):
     @patch("tap_surveymonkey.client.time.sleep")
     @patch("tap_surveymonkey.client.requests.request")
     def test_429_raises_rate_limit_error_after_max_tries(self, mock_request, mock_sleep):
-        """Persistent 429 exceeding max_tries raises SurveyMonkeyRateLimitError."""
+        """Persistent 429 exhausting all retries raises SurveyMonkeyRateLimitError.
+
+        The error message must NOT imply a further retry will occur (the caller
+        has no retry mechanism left at this point).
+        """
         rate_429 = _make_resp(429, headers=_rate_limit_headers(
             day_remaining=100, minute_remaining=0, minute_reset=1,
         ))
         mock_request.return_value = rate_429
 
-        with self.assertRaises(SurveyMonkeyRateLimitError):
+        with self.assertRaises(SurveyMonkeyRateLimitError) as ctx:
             SurveyMonkeyClient("tok").make_request("surveys")
+
+        msg = str(ctx.exception)
+        self.assertIn("rate limit exceeded", msg.lower())
+        self.assertNotIn("Will retry", msg)
 
     @patch("tap_surveymonkey.client.time.sleep")
     @patch("tap_surveymonkey.client.requests.request")

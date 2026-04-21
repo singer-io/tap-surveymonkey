@@ -17,6 +17,7 @@ SM_RESPONSE_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
 
 DEFAULT_PAGE_SIZE = "50"
 MAX_PAGE_LIMIT = 1000  # hard ceiling to prevent infinite loops
+CONFIG_MAX_PAGE_LIMIT_KEY = "max_page_limit"
 
 
 def strptime(dtime):
@@ -98,7 +99,8 @@ class PaginatedStream(Stream):
     def fetch_data(self, client: SurveyMonkeyClient, stream, config, state, parent_row=None, bookmark_value=None):
         params = self.get_params(stream, config, state, bookmark_value)
         page = 1
-        max_pages = MAX_PAGE_LIMIT
+        max_pages = int(config.get(CONFIG_MAX_PAGE_LIMIT_KEY, MAX_PAGE_LIMIT))
+        last_resp = None
         while page <= max_pages:
             if self.stream_id:
                 LOGGER.info("Fetching page {} of {} for {}".format(page, max_pages, self.stream_id))
@@ -114,6 +116,7 @@ class PaginatedStream(Stream):
             if resp.get("error"):
                 raise Exception(resp)
 
+            last_resp = resp
             raw_records = self.format_response(resp)
 
             for raw_record in raw_records:
@@ -121,10 +124,20 @@ class PaginatedStream(Stream):
                 yield raw_record
 
             if not resp["links"].get("next"):
+                last_resp = None  # clean exit — no truncation
                 break
 
             page += 1
             params.update({"page": page})
+
+        if last_resp is not None and last_resp["links"].get("next"):
+            raise Exception(
+                "Pagination cap of {} pages reached for stream '{}' but the API still has more "
+                "data (links.next is present). Sync is incomplete. Raise '{}' in your config "
+                "to paginate further, or reduce 'page_size' is set too small.".format(
+                    max_pages, self.stream_id, CONFIG_MAX_PAGE_LIMIT_KEY
+                )
+            )
 
 
 class SurveyStream(PaginatedStream):
