@@ -35,6 +35,7 @@ BACKOFF_EXCEPTIONS = (
 )
 
 MAX_RATE_LIMIT_RETRIES = 5
+DEFAULT_RATE_LIMIT_SLEEP = 60  # fallback sleep (seconds) when rate-limit headers are absent/invalid
 
 
 def _get_rate_limit_sleep_seconds(resp):
@@ -90,10 +91,18 @@ class SurveyMonkeyClient:
                 )
 
             sleep_seconds = _get_rate_limit_sleep_seconds(resp)
-            LOGGER.info(
-                "Rate limit reached (attempt %d/%d). Sleeping %d seconds before retrying...",
-                attempt, MAX_RATE_LIMIT_RETRIES, sleep_seconds,
-            )
+            if sleep_seconds == 0:
+                sleep_seconds = DEFAULT_RATE_LIMIT_SLEEP
+                LOGGER.warning(
+                    "Rate limit reached (attempt %d/%d) but no reset headers found. "
+                    "Falling back to %d second sleep.",
+                    attempt, MAX_RATE_LIMIT_RETRIES, sleep_seconds,
+                )
+            else:
+                LOGGER.info(
+                    "Rate limit reached (attempt %d/%d). Sleeping %d seconds before retrying...",
+                    attempt, MAX_RATE_LIMIT_RETRIES, sleep_seconds,
+                )
             if state:
                 singer.write_state(state)
             time.sleep(sleep_seconds)

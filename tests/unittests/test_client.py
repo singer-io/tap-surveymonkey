@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 
 import requests as req_lib
 
-from tap_surveymonkey.client import SurveyMonkeyClient, _get_rate_limit_sleep_seconds
+from tap_surveymonkey.client import SurveyMonkeyClient, _get_rate_limit_sleep_seconds, DEFAULT_RATE_LIMIT_SLEEP
 from tap_surveymonkey.exceptions import (
     ERROR_CODE_EXCEPTION_MAPPING,
     SurveyMonkeyBadGatewayError,
@@ -208,6 +208,18 @@ class TestClientRateLimiting(unittest.TestCase):
         mock_request.return_value = _make_resp(200, {"ok": True})
         SurveyMonkeyClient("tok").make_request("surveys")
         mock_sleep.assert_not_called()
+
+    @patch("tap_surveymonkey.client.time.sleep")
+    @patch("tap_surveymonkey.client.requests.request")
+    def test_missing_rate_limit_headers_uses_default_sleep(self, mock_request, mock_sleep):
+        """429 with no rate-limit headers falls back to DEFAULT_RATE_LIMIT_SLEEP."""
+        rate_429 = _make_resp(429, headers={})  # no rate-limit headers at all
+        retry_ok = _make_resp(200, {"ok": True})
+        mock_request.side_effect = [rate_429, retry_ok]
+
+        SurveyMonkeyClient("tok").make_request("surveys")
+
+        mock_sleep.assert_any_call(DEFAULT_RATE_LIMIT_SLEEP)
 
     @patch("tap_surveymonkey.client.time.sleep")
     @patch("tap_surveymonkey.client.requests.request")

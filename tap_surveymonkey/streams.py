@@ -134,7 +134,7 @@ class PaginatedStream(Stream):
             raise Exception(
                 "Pagination cap of {} pages reached for stream '{}' but the API still has more "
                 "data (links.next is present). Sync is incomplete. Raise '{}' in your config "
-                "to paginate further, or reduce 'page_size' is set too small.".format(
+                "to paginate further, or increase 'page_size' if it is set too small.".format(
                     max_pages, self.stream_id, CONFIG_MAX_PAGE_LIMIT_KEY
                 )
             )
