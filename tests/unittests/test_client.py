@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 
 import requests as req_lib
 
-from tap_surveymonkey.client import SurveyMonkeyClient, _get_rate_limit_sleep_seconds, DEFAULT_RATE_LIMIT_SLEEP
+from tap_surveymonkey.client import SurveyMonkeyClient, _get_rate_limit_sleep_seconds
 from tap_surveymonkey.exceptions import (
     ERROR_CODE_EXCEPTION_MAPPING,
     SurveyMonkeyBadGatewayError,
@@ -11,6 +11,7 @@ from tap_surveymonkey.exceptions import (
     SurveyMonkeyError,
     SurveyMonkeyForbiddenError,
     SurveyMonkeyInternalServerError,
+    SurveyMonkeyNotFoundError,
     SurveyMonkeyRateLimitError,
     SurveyMonkeyServiceUnavailableError,
     SurveyMonkeyUnauthorizedError,
@@ -93,10 +94,10 @@ class TestClientMakeRequestSuccess(unittest.TestCase):
         self.assertEqual(result, payload)
 
     @patch("tap_surveymonkey.client.requests.request")
-    def test_returns_none_on_404(self, mock_request):
+    def test_raises_not_found_on_404(self, mock_request):
         mock_request.return_value = _make_resp(404)
-        result = SurveyMonkeyClient("tok").make_request("surveys/nonexistent")
-        self.assertIsNone(result)
+        with self.assertRaises(SurveyMonkeyNotFoundError):
+            SurveyMonkeyClient("tok").make_request("surveys/nonexistent")
 
     @patch("tap_surveymonkey.client.requests.request")
     def test_post_method_forwarded(self, mock_request):
@@ -211,15 +212,16 @@ class TestClientRateLimiting(unittest.TestCase):
 
     @patch("tap_surveymonkey.client.time.sleep")
     @patch("tap_surveymonkey.client.requests.request")
-    def test_missing_rate_limit_headers_uses_default_sleep(self, mock_request, mock_sleep):
-        """429 with no rate-limit headers falls back to DEFAULT_RATE_LIMIT_SLEEP."""
+    def test_missing_rate_limit_headers_falls_back_to_exponential(self, mock_request, mock_sleep):
+        """429 with no rate-limit headers falls back to capped exponential sleep (2^tries)."""
         rate_429 = _make_resp(429, headers={})  # no rate-limit headers at all
         retry_ok = _make_resp(200, {"ok": True})
         mock_request.side_effect = [rate_429, retry_ok]
 
         SurveyMonkeyClient("tok").make_request("surveys")
 
-        mock_sleep.assert_any_call(DEFAULT_RATE_LIMIT_SLEEP)
+        # On first backoff details["tries"]==1, so exponential wait == 2**1 == 2 seconds
+        mock_sleep.assert_any_call(2)
 
     @patch("tap_surveymonkey.client.time.sleep")
     @patch("tap_surveymonkey.client.requests.request")

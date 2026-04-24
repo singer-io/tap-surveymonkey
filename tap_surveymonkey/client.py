@@ -14,28 +14,23 @@ from tap_surveymonkey.exceptions import (  # noqa: E402
     SurveyMonkeyError,
     SurveyMonkeyGatewayTimeoutError,
     SurveyMonkeyInternalServerError,
+    SurveyMonkeyNotFoundError,
     SurveyMonkeyRateLimitError,
     SurveyMonkeyServiceUnavailableError,
 )
 
 LOGGER = singer.get_logger()
 
-# Exceptions that trigger an automatic backoff-and-retry.
-# SurveyMonkeyRateLimitError is intentionally excluded: 429 responses are
-# handled with a header-driven sleep+retry loop entirely inside make_request,
-# so adding it here would cause a double wait (manual sleep + backoff sleep).
 BACKOFF_EXCEPTIONS = (
     ConnectionError,
     Timeout,
     ChunkedEncodingError,
+    SurveyMonkeyRateLimitError,
     SurveyMonkeyInternalServerError,
     SurveyMonkeyBadGatewayError,
     SurveyMonkeyServiceUnavailableError,
     SurveyMonkeyGatewayTimeoutError,
 )
-
-MAX_RATE_LIMIT_RETRIES = 5
-DEFAULT_RATE_LIMIT_SLEEP = 60  # fallback sleep (seconds) when rate-limit headers are absent/invalid
 
 
 def _get_rate_limit_sleep_seconds(resp):
@@ -58,15 +53,40 @@ def _get_rate_limit_sleep_seconds(resp):
     return 0
 
 
+def _on_backoff(details):
+    """
+    Unified wait strategy (called by backoff before each retry):
+    - 429 SurveyMonkeyRateLimitError  → header-driven sleep (day or minute reset)
+    - everything else                 → capped exponential back-off
+    """
+    exc = details.get("exception")
+    if isinstance(exc, SurveyMonkeyRateLimitError) and exc.response is not None:
+        sleep = _get_rate_limit_sleep_seconds(exc.response)
+        if sleep > 0:
+            LOGGER.info(
+                "Rate limit reached (attempt %d). Sleeping %d seconds...",
+                details["tries"], sleep,
+            )
+            time.sleep(sleep)
+            return
+        # headers absent / malformed → fall through to exponential
+        LOGGER.warning(
+            "Rate limit reached (attempt %d) but no reset headers found. "
+            "Falling back to exponential wait.", details["tries"],
+        )
+    time.sleep(min(2 ** details["tries"], 300))  # capped exponential for 5xx / network
+
+
 class SurveyMonkeyClient:
     def __init__(self, access_token):
         self.access_token = access_token
 
     @backoff.on_exception(
-        backoff.expo,
+        backoff.constant,
         BACKOFF_EXCEPTIONS,
         max_tries=5,
-        factor=2,
+        interval=0,          # actual sleeping is handled by _on_backoff
+        on_backoff=_on_backoff,
         logger=LOGGER,
     )
     def make_request(self, endpoint, state=None, method="GET", **request_kwargs):
@@ -75,43 +95,15 @@ class SurveyMonkeyClient:
             "Content-Type": "application/json",
         }
         url = "https://api.surveymonkey.com/v3/%s" % endpoint
+        resp = requests.request(method, url, headers=headers, timeout=30, **request_kwargs)
 
-        # 429 retries are handled entirely here using the API's own rate-limit
-        # headers, so SurveyMonkeyRateLimitError is NOT in BACKOFF_EXCEPTIONS.
-        # Adding it there would cause a double wait (header sleep + backoff sleep).
-        for attempt in range(1, MAX_RATE_LIMIT_RETRIES + 1):
-            resp = requests.request(method, url, headers=headers, **request_kwargs)
-
-            if resp.status_code != 429:
-                break
-
-            if attempt == MAX_RATE_LIMIT_RETRIES:
-                raise SurveyMonkeyRateLimitError(
-                    "HTTP 429 — rate limit exceeded after %d retries." % MAX_RATE_LIMIT_RETRIES
-                )
-
-            sleep_seconds = _get_rate_limit_sleep_seconds(resp)
-            if sleep_seconds == 0:
-                sleep_seconds = DEFAULT_RATE_LIMIT_SLEEP
-                LOGGER.warning(
-                    "Rate limit reached (attempt %d/%d) but no reset headers found. "
-                    "Falling back to %d second sleep.",
-                    attempt, MAX_RATE_LIMIT_RETRIES, sleep_seconds,
-                )
-            else:
-                LOGGER.info(
-                    "Rate limit reached (attempt %d/%d). Sleeping %d seconds before retrying...",
-                    attempt, MAX_RATE_LIMIT_RETRIES, sleep_seconds,
-                )
+        if resp.status_code == 429:
             if state:
                 singer.write_state(state)
-            time.sleep(sleep_seconds)
+            raise SurveyMonkeyRateLimitError(
+                "HTTP 429 — rate limit exceeded.", response=resp
+            )
 
-        # 404 — resource missing; callers check for None.
-        if resp.status_code == 404:
-            return None
-
-        # Any other non-2xx status code — map to the appropriate exception.
         if not (200 <= resp.status_code < 300):
             exc_class = ERROR_CODE_EXCEPTION_MAPPING.get(resp.status_code, SurveyMonkeyError)
             try:

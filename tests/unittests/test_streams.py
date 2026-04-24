@@ -4,6 +4,7 @@ from unittest.mock import MagicMock
 
 import pytz
 
+from tap_surveymonkey.exceptions import SurveyMonkeyNotFoundError
 from tap_surveymonkey.streams import (
     strptime,
     find_max_timestamp,
@@ -166,11 +167,11 @@ class TestPaginatedStreamFetchData(unittest.TestCase):
         self.assertEqual(len(results), 3)
 
     def test_raises_exception_when_response_is_none(self):
-        """PaginatedStream.fetch_data raises an exception when the client returns None."""
+        """PaginatedStream.fetch_data propagates SurveyMonkeyNotFoundError raised by the client on 404."""
         stream = self._make_paginated_stream()
         client = MagicMock()
-        client.make_request.return_value = None
-        with self.assertRaises(Exception):
+        client.make_request.side_effect = SurveyMonkeyNotFoundError("HTTP 404")
+        with self.assertRaises(SurveyMonkeyNotFoundError):
             list(stream.fetch_data(client, MagicMock(),
                                    {"start_date": "2021-01-01T00:00:00Z"}, {}))
 
@@ -254,11 +255,11 @@ class TestPaginatedStreamFetchData(unittest.TestCase):
 class TestStreamFetchData(unittest.TestCase):
 
     def test_raises_exception_when_response_is_none(self):
-        """Stream.fetch_data raises an exception when the client returns None (404)."""
+        """Stream.fetch_data propagates SurveyMonkeyNotFoundError raised by the client on 404."""
         stream = Stream(stream_id="survey_details", path="surveys/123/details")
         client = MagicMock()
-        client.make_request.return_value = None
-        with self.assertRaises(Exception):
+        client.make_request.side_effect = SurveyMonkeyNotFoundError("HTTP 404")
+        with self.assertRaises(SurveyMonkeyNotFoundError):
             list(stream.fetch_data(client, None, {}, {}))
 
     def test_raises_exception_on_error_in_response(self):

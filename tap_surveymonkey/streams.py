@@ -77,8 +77,6 @@ class Stream:
                 path = path.replace(f"{{parent_{key}}}", value)
 
         resp = client.make_request(path, params=None, state=state)
-        if not resp:
-            raise Exception("Resource not found")
         if resp.get("error"):
             raise Exception(resp)
 
@@ -111,8 +109,6 @@ class PaginatedStream(Stream):
                     path = path.replace(f"{{parent_{key}}}", value)
 
             resp = client.make_request(path, params=params, state=state)
-            if not resp:
-                raise Exception("Resource not found")
             if resp.get("error"):
                 raise Exception(resp)
 

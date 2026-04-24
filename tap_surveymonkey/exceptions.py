@@ -35,6 +35,9 @@ class SurveyMonkeyUnprocessableEntityError(SurveyMonkeyError):
 
 class SurveyMonkeyRateLimitError(SurveyMonkeyError):
     """HTTP 429 — Rate limit exceeded."""
+    def __init__(self, message, response=None):
+        super().__init__(message)
+        self.response = response  # carry the raw response for header inspection
 
 
 class SurveyMonkeyInternalServerError(SurveyMonkeyError):
