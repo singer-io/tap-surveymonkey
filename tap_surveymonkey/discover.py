@@ -63,6 +63,7 @@ def discover():
             "tap_stream_id": schema_name,
             "schema": schema,
             "metadata": schema_meta,
+            "key_properties": STREAMS[schema_name].key_properties,
         }
 
         streams.append(catalog_entry)
