@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.2.1
+  * Add `backoff` as an explicit install dependency [#44](https://github.com/singer-io/tap-surveymonkey/pull/44)
+
 ## 2.2.0
   * Upgrade Python version to 3.12
   * Unit tests and Integration tests
