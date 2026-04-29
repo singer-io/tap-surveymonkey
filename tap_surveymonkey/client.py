@@ -4,40 +4,49 @@ import backoff
 import requests
 import singer
 import urllib3
-from requests.exceptions import ChunkedEncodingError, ConnectionError, Timeout
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-from tap_surveymonkey.exceptions import (  # noqa: E402
+from tap_surveymonkey.exceptions import (
+    BACKOFF_EXCEPTIONS,
     ERROR_CODE_EXCEPTION_MAPPING,
-    SurveyMonkeyBadGatewayError,
     SurveyMonkeyError,
-    SurveyMonkeyGatewayTimeoutError,
-    SurveyMonkeyInternalServerError,
-    SurveyMonkeyNotFoundError,
     SurveyMonkeyRateLimitError,
-    SurveyMonkeyServiceUnavailableError,
 )
 
 LOGGER = singer.get_logger()
 
-BACKOFF_EXCEPTIONS = (
-    ConnectionError,
-    Timeout,
-    ChunkedEncodingError,
-    SurveyMonkeyRateLimitError,
-    SurveyMonkeyInternalServerError,
-    SurveyMonkeyBadGatewayError,
-    SurveyMonkeyServiceUnavailableError,
-    SurveyMonkeyGatewayTimeoutError,
-)
-
 
 def _get_rate_limit_sleep_seconds(resp):
-    """Return the number of seconds to sleep based on rate-limit response headers.
+    """Return how many *seconds* to sleep after receiving a 429 response.
 
-    Prefers the daily reset window over the per-minute window when both limits
-    are exhausted.  Returns 0 if no header indicates the limit was reached.
+    SurveyMonkey enforces two independent rate-limit quotas, both reported as
+    HTTP response headers on every request:
+
+    **1. Daily quota** — total requests allowed per UTC day.
+
+        X-Ratelimit-App-Global-Day-Remaining: 0      ← 0 means exhausted
+        X-Ratelimit-App-Global-Day-Reset:     3600   ← seconds until refill
+
+        "Day-Reset: 3600" does NOT mean sleep for 1 day.
+        It means the quota refills in 3600 seconds (~1 hour from now).
+        We sleep for 3602 s (+ 2 s safety buffer).
+
+    **2. Per-minute quota** — burst limit reset every 60 seconds.
+
+        X-Ratelimit-App-Global-Minute-Remaining: 0
+        X-Ratelimit-App-Global-Minute-Reset:     30   ← seconds until refill
+
+        We sleep for 32 s (30 + 2 s buffer).
+
+    **Decision logic:**
+        - If the daily quota is exhausted  → sleep for Day-Reset  + 2 s.
+        - Else if minute quota exhausted   → sleep for Minute-Reset + 2 s.
+        - If headers are missing/malformed → return 0 (caller uses exponential
+          back-off instead).
+
+    The default of ``-1`` for the *Remaining* headers ensures we never treat a
+    missing header as exhausted (only ``0`` triggers a sleep).
     """
     try:
         day_remaining = int(resp.headers.get("X-Ratelimit-App-Global-Day-Remaining", -1))

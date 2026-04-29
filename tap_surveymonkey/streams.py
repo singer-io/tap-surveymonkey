@@ -16,8 +16,6 @@ SM_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S"
 SM_RESPONSE_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
 
 DEFAULT_PAGE_SIZE = "50"
-MAX_PAGE_LIMIT = 1000  # hard ceiling to prevent infinite loops
-CONFIG_MAX_PAGE_LIMIT_KEY = "max_page_limit"
 
 
 def strptime(dtime):
@@ -77,6 +75,8 @@ class Stream:
                 path = path.replace(f"{{parent_{key}}}", value)
 
         resp = client.make_request(path, params=None, state=state)
+        if not resp:
+            raise Exception("Resource not found")
         if resp.get("error"):
             raise Exception(resp)
 
@@ -97,11 +97,9 @@ class PaginatedStream(Stream):
     def fetch_data(self, client: SurveyMonkeyClient, stream, config, state, parent_row=None, bookmark_value=None):
         params = self.get_params(stream, config, state, bookmark_value)
         page = 1
-        max_pages = int(config.get(CONFIG_MAX_PAGE_LIMIT_KEY, MAX_PAGE_LIMIT))
-        last_resp = None
-        while page <= max_pages:
+        while True:
             if self.stream_id:
-                LOGGER.info("Fetching page {} of {} for {}".format(page, max_pages, self.stream_id))
+                LOGGER.info("Fetching page {} for {}".format(page, self.stream_id))
 
             path = self.path
             if parent_row:
@@ -109,10 +107,11 @@ class PaginatedStream(Stream):
                     path = path.replace(f"{{parent_{key}}}", value)
 
             resp = client.make_request(path, params=params, state=state)
+            if not resp:
+                raise Exception("Resource not found")
             if resp.get("error"):
                 raise Exception(resp)
 
-            last_resp = resp
             raw_records = self.format_response(resp)
 
             for raw_record in raw_records:
@@ -120,20 +119,10 @@ class PaginatedStream(Stream):
                 yield raw_record
 
             if not resp["links"].get("next"):
-                last_resp = None  # clean exit — no truncation
                 break
 
             page += 1
             params.update({"page": page})
-
-        if last_resp is not None and last_resp["links"].get("next"):
-            raise Exception(
-                "Pagination cap of {} pages reached for stream '{}' but the API still has more "
-                "data (links.next is present). Sync is incomplete. Raise '{}' in your config "
-                "to paginate further, or increase 'page_size' if it is set too small.".format(
-                    max_pages, self.stream_id, CONFIG_MAX_PAGE_LIMIT_KEY
-                )
-            )
 
 
 class SurveyStream(PaginatedStream):

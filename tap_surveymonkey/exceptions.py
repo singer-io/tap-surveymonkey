@@ -1,5 +1,7 @@
 """Custom exceptions for the SurveyMonkey tap."""
 
+from requests.exceptions import ChunkedEncodingError, ConnectionError, Timeout
+
 
 class SurveyMonkeyError(Exception):
     """Base exception for all SurveyMonkey API errors."""
@@ -71,3 +73,15 @@ ERROR_CODE_EXCEPTION_MAPPING = {
     503: SurveyMonkeyServiceUnavailableError,
     504: SurveyMonkeyGatewayTimeoutError,
 }
+
+# Exception types that should trigger a backoff/retry.
+BACKOFF_EXCEPTIONS = (
+    ConnectionError,
+    Timeout,
+    ChunkedEncodingError,
+    SurveyMonkeyRateLimitError,
+    SurveyMonkeyInternalServerError,
+    SurveyMonkeyBadGatewayError,
+    SurveyMonkeyServiceUnavailableError,
+    SurveyMonkeyGatewayTimeoutError,
+)
