@@ -82,6 +82,9 @@ celerybeat-schedule
 venv/
 ENV/
 
+# temporary
+tmp/
+
 # Spyder project settings
 .spyderproject
 
@@ -103,4 +106,3 @@ tags
 singer-check-tap-data
 state.json
 .vscode/*
-tmp/

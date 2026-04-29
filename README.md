@@ -96,9 +96,8 @@ which is a human-readable form of the survey respondent's response to question. 
 | ------------------ | --------- | --------------
 | `access_token`     | Yes       | See https://developer.surveymonkey.com/api/v3/#oauth-2-0-flow
 | `start_date`       | Yes        | For streams with replication method `INCREMENTAL` the start date time to be used
-| `page_size`        | No, default `"50"` | The page size for paginated streams (max: 100)
+| `page_size`        | No, default `"50"` | The page size for paginated streams
 | `survey_id`        | No        | In case you just want to get data for just one survey. Does not work with stream `surveys`.
-| `max_page_limit`   | No, default `1000` | Maximum number of pages fetched per paginated stream. If the cap is reached while `links.next` is still present the tap raises an error (rather than silently truncating). Increase this value for very large accounts, e.g. `"max_page_limit": 2000`.
 
 ## Streams
 
