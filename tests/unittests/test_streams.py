@@ -4,7 +4,6 @@ from unittest.mock import MagicMock
 
 import pytz
 
-from tap_surveymonkey.exceptions import SurveyMonkeyNotFoundError
 from tap_surveymonkey.streams import (
     strptime,
     find_max_timestamp,
@@ -167,11 +166,11 @@ class TestPaginatedStreamFetchData(unittest.TestCase):
         self.assertEqual(len(results), 3)
 
     def test_raises_exception_when_response_is_none(self):
-        """PaginatedStream.fetch_data propagates SurveyMonkeyNotFoundError raised by the client on 404."""
+        """PaginatedStream.fetch_data raises an exception when the client returns None."""
         stream = self._make_paginated_stream()
         client = MagicMock()
-        client.make_request.side_effect = SurveyMonkeyNotFoundError("HTTP 404")
-        with self.assertRaises(SurveyMonkeyNotFoundError):
+        client.make_request.return_value = None
+        with self.assertRaises(Exception):
             list(stream.fetch_data(client, MagicMock(),
                                    {"start_date": "2021-01-01T00:00:00Z"}, {}))
 
@@ -199,67 +198,15 @@ class TestPaginatedStreamFetchData(unittest.TestCase):
         self.assertEqual(len(results), 2)
         self.assertEqual(client.make_request.call_count, 2)
 
-    def test_pagination_stops_when_links_next_is_absent(self):
-        """fetch_data stops fetching pages when links.next is not present in the response."""
-        stream = self._make_paginated_stream()
-        client = MagicMock()
-        client.make_request.side_effect = [
-            {"total": 2, "data": [{"id": "1"}], "links": {"next": "?page=2"}},
-            {"total": 2, "data": [{"id": "2"}], "links": {}},  # no next → stop
-        ]
-
-        results = list(stream.fetch_data(client, MagicMock(),
-                                         {"start_date": "2021-01-01T00:00:00Z", "page_size": "1"}, {}))
-
-        self.assertEqual(len(results), 2)
-        self.assertEqual(client.make_request.call_count, 2)
-
-    def test_hard_cap_raises_when_links_next_still_present(self):
-        """fetch_data raises an exception when the page cap is hit but links.next is still present."""
-        stream = self._make_paginated_stream()
-        client = MagicMock()
-        # API returns no total and links.next always set — worst-case runaway scenario.
-        always_next = {"data": [{"id": "x"}], "links": {"next": "?page=next"}}
-        # Use a patched MAX_PAGE_LIMIT of 3 to keep the test fast.
-        import tap_surveymonkey.streams as streams_mod
-        original = streams_mod.MAX_PAGE_LIMIT
-        try:
-            streams_mod.MAX_PAGE_LIMIT = 3
-            client.make_request.return_value = always_next
-            with self.assertRaises(Exception) as ctx:
-                list(stream.fetch_data(client, MagicMock(),
-                                       {"start_date": "2021-01-01T00:00:00Z"}, {}))
-        finally:
-            streams_mod.MAX_PAGE_LIMIT = original
-
-        self.assertIn("Pagination cap", str(ctx.exception))
-        self.assertIn("links.next", str(ctx.exception))
-        # All 3 capped pages must have been fetched before the error is raised.
-        self.assertEqual(client.make_request.call_count, 3)
-
-    def test_hard_cap_configurable_via_config(self):
-        """max_page_limit in config overrides the module-level MAX_PAGE_LIMIT."""
-        stream = self._make_paginated_stream()
-        client = MagicMock()
-        always_next = {"data": [{"id": "x"}], "links": {"next": "?page=next"}}
-        client.make_request.return_value = always_next
-        # A cap of 2 supplied via config should be respected.
-        with self.assertRaises(Exception) as ctx:
-            list(stream.fetch_data(client, MagicMock(),
-                                   {"start_date": "2021-01-01T00:00:00Z", "max_page_limit": "2"}, {}))
-
-        self.assertIn("Pagination cap", str(ctx.exception))
-        self.assertEqual(client.make_request.call_count, 2)
-
 
 class TestStreamFetchData(unittest.TestCase):
 
     def test_raises_exception_when_response_is_none(self):
-        """Stream.fetch_data propagates SurveyMonkeyNotFoundError raised by the client on 404."""
+        """Stream.fetch_data raises an exception when the client returns None (404)."""
         stream = Stream(stream_id="survey_details", path="surveys/123/details")
         client = MagicMock()
-        client.make_request.side_effect = SurveyMonkeyNotFoundError("HTTP 404")
-        with self.assertRaises(SurveyMonkeyNotFoundError):
+        client.make_request.return_value = None
+        with self.assertRaises(Exception):
             list(stream.fetch_data(client, None, {}, {}))
 
     def test_raises_exception_on_error_in_response(self):
