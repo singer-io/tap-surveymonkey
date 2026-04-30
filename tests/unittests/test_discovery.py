@@ -118,3 +118,27 @@ class TestDiscover(unittest.TestCase):
         """Number of catalog entries equals the number of entries in STREAMS."""
         cat = discover()
         self.assertEqual(len(cat.streams), len(STREAMS))
+
+    def test_catalog_entry_has_key_properties(self):
+        """Every catalog entry exposes key_properties (added in PR #44)."""
+        cat = discover()
+        for entry in cat.streams:
+            with self.subTest(stream=entry.tap_stream_id):
+                # CatalogEntry stores key_properties; access via attribute or dict
+                entry_dict = entry.to_dict()
+                self.assertIn("key_properties", entry_dict)
+
+    def test_catalog_entry_key_properties_match_stream_class(self):
+        """key_properties in each catalog entry matches the stream class definition (PR #44)."""
+        cat = discover()
+        for entry in cat.streams:
+            with self.subTest(stream=entry.tap_stream_id):
+                expected = STREAMS[entry.tap_stream_id].key_properties
+                self.assertEqual(entry.key_properties, expected)
+
+    def test_catalog_entry_key_properties_is_list(self):
+        """key_properties on every catalog entry is a list (or None for full-table streams)."""
+        cat = discover()
+        for entry in cat.streams:
+            with self.subTest(stream=entry.tap_stream_id):
+                self.assertIsInstance(entry.key_properties, (list, type(None)))
