@@ -1,7 +1,16 @@
 # Changelog
 
-## 2.1.2
+## 2.2.2
   * Fix TypeError in parent_row path substitution [#43](https://github.com/singer-io/tap-surveymonkey/pull/43)
+
+## 2.2.1
+  * Add `backoff` as an explicit install dependency [#44](https://github.com/singer-io/tap-surveymonkey/pull/44)
+  * Refactor error handling: introduce typed exceptions (`exceptions.py`) and `ERROR_CODE_EXCEPTION_MAPPING` for all HTTP error codes [#44](https://github.com/singer-io/tap-surveymonkey/pull/44)
+  * Replace inline 429 retry logic with `backoff`-driven retry; add header-aware sleep (`Day-Reset` / `Minute-Reset`) with exponential fallback [#44](https://github.com/singer-io/tap-surveymonkey/pull/44)
+
+## 2.2.0
+  * Upgrade Python version to 3.12
+  * Unit tests and Integration tests
 
 ## 2.1.1
   * Updates requests to 2.32.4 [#35](https://github.com/singer-io/tap-surveymonkey/pull/35)
