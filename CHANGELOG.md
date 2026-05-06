@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.2.2
+  * Fix TypeError in parent_row path substitution [#43](https://github.com/singer-io/tap-surveymonkey/pull/43)
+
 ## 2.2.1
   * Add `backoff` as an explicit install dependency [#44](https://github.com/singer-io/tap-surveymonkey/pull/44)
   * Refactor error handling: introduce typed exceptions (`exceptions.py`) and `ERROR_CODE_EXCEPTION_MAPPING` for all HTTP error codes [#44](https://github.com/singer-io/tap-surveymonkey/pull/44)
