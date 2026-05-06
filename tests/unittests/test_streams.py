@@ -135,6 +135,41 @@ class TestSurveyStreamFetchData(unittest.TestCase):
         results = list(stream.fetch_data(client, MagicMock(), config, {}))
         self.assertEqual(len(results), 2)
 
+    def test_yields_only_id_and_date_modified_when_no_survey_id(self):
+        """SurveyStream.fetch_data strips all fields except id and date_modified."""
+        stream = SurveyStream(stream_id=None, path="surveys")
+        config = {"start_date": "2022-01-01T00:00:00Z"}
+        mock_resp = {
+            "data": [{
+                "id": "99",
+                "title": "My Survey",
+                "response_count": 42,
+                "date_modified": "2022-06-01T00:00:00Z"
+            }],
+            "links": {}
+        }
+        client = MagicMock()
+        client.make_request.return_value = mock_resp
+        results = list(stream.fetch_data(client, MagicMock(), config, {}))
+        self.assertEqual(results, [{"id": "99", "date_modified": "2022-06-01T00:00:00Z"}])
+
+    def test_integer_field_in_api_response_does_not_raise_type_error(self):
+        """Regression: integer fields (e.g. response_count) in raw records must not
+        reach str.replace() in child-stream path substitution."""
+        stream = SurveyStream(stream_id=None, path="surveys")
+        config = {"start_date": "2022-01-01T00:00:00Z"}
+        mock_resp = {
+            "data": [{"id": "7", "response_count": 100, "date_modified": "2022-01-01T00:00:00Z"}],
+            "links": {}
+        }
+        client = MagicMock()
+        client.make_request.return_value = mock_resp
+        results = list(stream.fetch_data(client, MagicMock(), config, {}))
+        # All values in the yielded dict must be strings or None (safe for path substitution)
+        for record in results:
+            for val in record.values():
+                self.assertIsInstance(val, (str, type(None)))
+
 
 class TestPaginatedStreamFetchData(unittest.TestCase):
 

@@ -1,7 +1,7 @@
 # Changelog
 
 ## 2.2.2
-  * Fix TypeError in parent_row path substitution [#43](https://github.com/singer-io/tap-surveymonkey/pull/43)
+  * Fix TypeError in parent_row path substitution [#47](https://github.com/singer-io/tap-surveymonkey/pull/47)
 
 ## 2.2.1
   * Add `backoff` as an explicit install dependency [#44](https://github.com/singer-io/tap-surveymonkey/pull/44)
