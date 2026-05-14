@@ -14,7 +14,7 @@ Options:
     --output       Output file for stream data  [default: tmp/stream_data.json]
     --fetch-only   Skip survey creation; just fetch streams for the resolved survey
     --cleanup      Delete the survey (and collector) created by this run
-    --show-raw     Print every raw API response to stdout
+    --show-raw     Print the aggregated stream data JSON to stdout after all fetches complete
 """
 
 import argparse
