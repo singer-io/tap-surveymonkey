@@ -177,8 +177,14 @@ Creating a collector (required to seed responses) requires a **verified email** 
 
 After creating test data, run the tap to confirm it picks up the new survey:
 
+**Windows:**
+```powershell
+.\venv\Scripts\tap-surveymonkey.exe --config tmp/configs/config.json --catalog tmp/catalogs/catalog.json > tmp/outputs/output.json
+```
+
+**macOS / Linux:**
 ```bash
-.\venv\Scripts\tap-surveymonkey.exe --config tmp/configs/config.json --catalog tmp/catalogs/catalog_may4.json > tmp/outputs/output_may4.json
+tap-surveymonkey --config tmp/configs/config.json --catalog tmp/catalogs/catalog.json > tmp/outputs/output.json
 ```
 
 

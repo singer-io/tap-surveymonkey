@@ -32,18 +32,50 @@ BASE_URL = "https://api.surveymonkey.com/v3"
 # Core API helpers
 # ---------------------------------------------------------------------------
 
+def _get_rate_limit_sleep(resp) -> int:
+    """Return seconds to sleep after a 429, or 0 to fall back to exponential."""
+    try:
+        day_rem = int(resp.headers.get("X-Ratelimit-App-Global-Day-Remaining", -1))
+        if day_rem == 0:
+            return int(resp.headers.get("X-Ratelimit-App-Global-Day-Reset", 60)) + 2
+        min_rem = int(resp.headers.get("X-Ratelimit-App-Global-Minute-Remaining", -1))
+        if min_rem == 0:
+            return int(resp.headers.get("X-Ratelimit-App-Global-Minute-Reset", 60)) + 2
+    except (ValueError, TypeError):
+        pass
+    return 0
+
+
 def api(method: str, path: str, token: str, **kwargs):
     url = f"{BASE_URL}/{path.lstrip('/')}"
-    resp = requests.request(
-        method, url,
-        headers={"Authorization": f"bearer {token}", "Content-Type": "application/json"},
-        timeout=30,
-        **kwargs,
-    )
-    if not resp.ok:
-        print(f"  ERROR {resp.status_code}: {resp.text}")
-        resp.raise_for_status()
-    return resp.json()
+    max_tries = 5
+    for attempt in range(max_tries):
+        resp = requests.request(
+            method, url,
+            headers={"Authorization": f"bearer {token}", "Content-Type": "application/json"},
+            timeout=30,
+            **kwargs,
+        )
+        if resp.status_code == 429:
+            sleep = _get_rate_limit_sleep(resp) or min(2 ** (attempt + 1), 300)
+            print(f"  429 rate-limited - sleeping {sleep}s (attempt {attempt + 1}/{max_tries})")
+            time.sleep(sleep)
+            continue
+        if resp.status_code >= 500 and attempt < max_tries - 1:
+            sleep = min(2 ** (attempt + 1), 60)
+            print(f"  {resp.status_code} server error - retrying in {sleep}s (attempt {attempt + 1}/{max_tries})")
+            time.sleep(sleep)
+            continue
+        if not resp.ok:
+            print(f"  ERROR {resp.status_code}: {resp.text}")
+            resp.raise_for_status()
+        # 204 No Content or empty body (e.g. DELETE) → return None
+        if resp.status_code == 204 or not resp.content:
+            return None
+        return resp.json()
+    # exhausted all retries
+    print(f"  ERROR {resp.status_code}: {resp.text}")
+    resp.raise_for_status()
 
 
 def paginate(token: str, path: str, params: dict | None = None) -> list:
@@ -254,7 +286,7 @@ def fetch_all_streams(token: str, survey_id: str | None, start_date: str | None 
         print(f"\n[STREAM] {label}")
         rparams: dict = {"sort_by": "date_modified", "sort_order": "ASC"}
         if simple:
-            rparams["simple"] = "true"
+            rparams["simple"] = True
         if start_date:
             rparams["start_modified_at"] = start_date
         records = []
@@ -289,7 +321,7 @@ def main():
     parser.add_argument("--survey-id", help="Override survey ID (auto-fetched + saved to config if omitted)")
     parser.add_argument("--fetch-only", action="store_true", help="Skip creation; only fetch streams")
     parser.add_argument("--cleanup", action="store_true", help="Delete created survey/collector when done")
-    parser.add_argument("--show-raw", action="store_true", help="Print every raw API response to stdout")
+    parser.add_argument("--show-raw", action="store_true", help="Print the aggregated stream data JSON to stdout after all fetches complete")
     args = parser.parse_args()
 
     token, cfg, cfg_path = load_config(args)
