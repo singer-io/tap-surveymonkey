@@ -99,6 +99,96 @@ which is a human-readable form of the survey respondent's response to question. 
 | `page_size`        | No, default `"50"` | The page size for paginated streams
 | `survey_id`        | No        | In case you just want to get data for just one survey. Does not work with stream `surveys`.
 
+## Creating Test Data
+
+The script `.spike/create_test_data.py` creates a survey with questions, optionally seeds a synthetic response, fetches all four tap streams, and writes the results to a JSON file. It also keeps `tmp/configs/config.json` up to date with the active `survey_id`.
+
+### Prerequisites
+
+1. A SurveyMonkey account with an OAuth2 access token.
+2. Config file at `tmp/configs/config.json`:
+
+```json
+{
+    "access_token": "YOUR_ACCESS_TOKEN",
+    "start_date": "2024-01-01T00:00:00Z"
+}
+```
+
+The script will populate `survey_id` automatically on first run.
+
+### Usage
+
+**Create a new survey and fetch all streams** _(most common)_:
+
+```bash
+python .spike/create_test_data.py --config tmp/configs/config.json
+```
+
+This will:
+- Create a survey with 3 questions (single-choice, open-ended, multiple-choice)
+- Attempt to create a collector and seed one synthetic response
+- Rename the survey title to `TAP Test Survey (updated)`
+- Write the active `survey_id` back to `tmp/configs/config.json`
+- Fetch all four streams and save to `tmp/stream_data.json`
+
+**Fetch streams only** (no new survey created):
+
+```bash
+python .spike/create_test_data.py --config tmp/configs/config.json --fetch-only
+```
+
+**Scope to a specific survey**:
+
+```bash
+python .spike/create_test_data.py --config tmp/configs/config.json --fetch-only --survey-id 123456789
+```
+
+**Change the output file**:
+
+```bash
+python .spike/create_test_data.py --config tmp/configs/config.json --output tmp/outputs/my_streams.json
+```
+
+**Clean up after a run** (deletes the survey and collector created):
+
+```bash
+python .spike/create_test_data.py --config tmp/configs/config.json --cleanup
+```
+
+### Output
+
+`tmp/stream_data.json` contains a JSON object keyed by stream name:
+
+```json
+{
+  "surveys": [ ... ],
+  "survey_details": [ ... ],
+  "responses": [ ... ],
+  "simplified_responses": [ ... ]
+}
+```
+
+### Note on responses
+
+Creating a collector (required to seed responses) requires a **verified email** on the SurveyMonkey account. If the account email is unverified, `responses` and `simplified_responses` will be empty. Verify your email at [app.surveymonkey.com](https://app.surveymonkey.com) → Account → Settings, then re-run the script.
+
+### Verifying with the tap
+
+After creating test data, run the tap to confirm it picks up the new survey:
+
+**Windows:**
+```powershell
+.\venv\Scripts\tap-surveymonkey.exe --config tmp/configs/config.json --catalog tmp/catalogs/catalog.json > tmp/outputs/output.json
+```
+
+**macOS / Linux:**
+```bash
+tap-surveymonkey --config tmp/configs/config.json --catalog tmp/catalogs/catalog.json > tmp/outputs/output.json
+```
+
+
+
 ## Streams
 
 ### surveys
