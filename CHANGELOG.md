@@ -2,7 +2,8 @@
 
 ## 2.2.3
   * Bump `requests` to 2.34.2 to address CVE security advisories [#48](https://github.com/singer-io/tap-surveymonkey/pull/48)
-  * Bump `urllib3` to 2.7.0 (dev dependency) to fix two HIGH severity CVEs: cross-origin redirect sensitive header leak and compressed response resource exhaustion [#48](https://github.com/singer-io/tap-surveymonkey/pull/48)
+  * Bump `urllib3` to 2.7.0 to fix two HIGH severity CVEs: cross-origin redirect sensitive header leak and compressed response resource exhaustion [#48](https://github.com/singer-io/tap-surveymonkey/pull/48)
+  * **Breaking change for existing users:** PR [#44](https://github.com/singer-io/tap-surveymonkey/pull/44) introduced explicit `key_properties = ["id"]` for all streams; Singer targets (e.g. BigQuery) that previously ingested data without `key_properties` and stored `__sdc_primary_key` as the primary key must update their primary key metadata to `id` before loading new data
 
 ## 2.2.2
   * Fix TypeError in parent_row path substitution [#43](https://github.com/singer-io/tap-surveymonkey/pull/43)
