@@ -13,6 +13,7 @@ setup(
         "singer-python==6.8.0",
         "requests==2.34.2",
         "backoff==2.2.1",
+        "urllib3==2.7.0",
     ],
     extras_require={
         'dev': [
