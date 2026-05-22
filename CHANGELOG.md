@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.3
+  * Bump `requests` to 2.34.2 to address CVE security advisories [#48](https://github.com/singer-io/tap-surveymonkey/pull/48)
+  * Bump `urllib3` to 2.7.0 (dev dependency) to fix two HIGH severity CVEs: cross-origin redirect sensitive header leak and compressed response resource exhaustion [#48](https://github.com/singer-io/tap-surveymonkey/pull/48)
+
 ## 2.2.2
   * Fix TypeError in parent_row path substitution [#43](https://github.com/singer-io/tap-surveymonkey/pull/43)
 
