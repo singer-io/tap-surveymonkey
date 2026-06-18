@@ -5,6 +5,7 @@ test class. Run with: python -m pytest tests/ -v
 """
 import json
 import os
+from unittest.mock import MagicMock
 
 from singer import metadata
 from singer.catalog import Catalog, CatalogEntry
@@ -129,7 +130,7 @@ class SurveyMonkeyBaseTest:
         Args:
             stream_names: iterable of stream names to select. If None, selects all.
         """
-        cat = discover()
+        cat = discover(MagicMock())
         if stream_names is None:
             stream_names = {e.tap_stream_id for e in cat.streams}
         else:
