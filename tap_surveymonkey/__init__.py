@@ -2,6 +2,7 @@
 # pylint: disable=E1111
 import singer
 
+from tap_surveymonkey.client import SurveyMonkeyClient
 from tap_surveymonkey.discover import discover
 from tap_surveymonkey.sync import sync
 
@@ -15,15 +16,18 @@ def main():
     # Parse command line arguments
     args = singer.utils.parse_args(REQUIRED_CONFIG_KEYS)
 
+    client = SurveyMonkeyClient(args.config["access_token"])
+
     # If discover flag was passed, run discovery mode
     if args.discover:
-        catalog = discover().dump()
+        catalog = discover(client)
+        catalog.dump()
     # Otherwise run in sync mode
     else:
         if args.catalog:
             catalog = args.catalog
         else:
-            catalog = discover()
+            catalog = discover(client)
 
         sync(args.config, args.state, catalog)
 

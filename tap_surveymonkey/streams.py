@@ -4,6 +4,7 @@ import singer.utils
 from singer import metadata
 
 from tap_surveymonkey.client import SurveyMonkeyClient
+from tap_surveymonkey.exceptions import SurveyMonkeyForbiddenError
 
 
 LOGGER = singer.get_logger()
@@ -61,6 +62,22 @@ class Stream:
         self.path = path
         self._params = {}
         self.parent_stream = parent_stream
+
+    def check_access(self, client):
+        """
+        Verify that the API credentials have read access to this stream.
+        Returns True if accessible, False if a 403 Forbidden error is raised.
+        """
+        try:
+            client.make_request(self.path, params={"per_page": 1, "page": 1})
+            return True
+        except SurveyMonkeyForbiddenError as exc:
+            LOGGER.warning(
+                "Unauthorized Stream: %s, excluding from catalog. HTTP-Error-Message: '%s'",
+                self.stream_id,
+                exc,
+            )
+            return False
 
     def format_response(self, response):
         return response
