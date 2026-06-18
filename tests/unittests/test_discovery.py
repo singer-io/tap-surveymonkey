@@ -215,10 +215,8 @@ class TestApplyAccessChecks(unittest.TestCase):
         self.assertEqual(set(schemas.keys()), original_keys)
 
     def test_all_forbidden_raises(self):
-        """When all top-level streams return 403 and no other streams exist, raises."""
-        # In this tap child streams always pass check_access, so we simulate
-        # a scenario with only top-level streams by patching STREAMS.
-        from tap_surveymonkey.streams import Surveys
+        """When all streams return 403 and schemas are emptied, raises."""
+        # Patch STREAMS down to a single stream to exercise the "no accessible streams" error path.
         only_top_level = {"surveys": STREAMS["surveys"]}
         schemas = {"surveys": {"properties": {}}}
         field_metadata = {"surveys": []}
