@@ -151,10 +151,11 @@ class SurveyMonkeyAutomaticFieldsTest(SurveyMonkeyBaseTest, unittest.TestCase):
 
     def test_discovery_id_has_inclusion_metadata(self):
         """'id' field carries an inclusion type in the Singer catalog metadata."""
+        from unittest.mock import MagicMock
         from singer import metadata as md
         from tap_surveymonkey.discover import discover
 
-        catalog = discover()
+        catalog = discover(MagicMock())
         for entry in catalog.streams:
             with self.subTest(stream=entry.tap_stream_id):
                 mdata = md.to_map(entry.metadata)
