@@ -138,10 +138,11 @@ class SurveyMonkeyAutomaticFieldsTest(SurveyMonkeyBaseTest, unittest.TestCase):
 
     def test_discovery_date_modified_has_automatic_inclusion_metadata(self):
         """date_modified carries inclusion=automatic in the Singer catalog metadata."""
+        from unittest.mock import MagicMock
         from singer import metadata as md
         from tap_surveymonkey.discover import discover
 
-        catalog = discover()
+        catalog = discover(MagicMock())
         for entry in catalog.streams:
             with self.subTest(stream=entry.tap_stream_id):
                 mdata = md.to_map(entry.metadata)
