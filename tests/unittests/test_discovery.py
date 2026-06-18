@@ -175,23 +175,21 @@ class TestCheckAccess(unittest.TestCase):
         stream_obj = STREAMS["surveys"]
         self.assertFalse(stream_obj.check_access(client))
 
-    def test_child_stream_always_returns_true(self):
-        """check_access returns True for child streams regardless of client."""
+    def test_all_streams_checked_when_forbidden(self):
+        """check_access returns False for all streams when API raises 403."""
         client = _make_forbidden_client()
         for name, stream_obj in STREAMS.items():
-            if stream_obj.parent_stream is not None:
-                with self.subTest(stream=name):
-                    self.assertTrue(stream_obj.check_access(client))
+            with self.subTest(stream=name):
+                self.assertFalse(stream_obj.check_access(client))
 
-    def test_child_stream_does_not_call_api(self):
-        """check_access for child streams does not make any API call."""
-        client = _make_forbidden_client()
+    def test_all_streams_call_api(self):
+        """check_access calls the API for every stream including child streams."""
+        client = _make_accessible_client()
         for name, stream_obj in STREAMS.items():
-            if stream_obj.parent_stream is not None:
-                with self.subTest(stream=name):
-                    client.reset_mock()
-                    stream_obj.check_access(client)
-                    client.make_request.assert_not_called()
+            with self.subTest(stream=name):
+                client.reset_mock()
+                stream_obj.check_access(client)
+                client.make_request.assert_called_once()
 
     def test_forbidden_logs_warning_with_stream_id_and_error(self):
         """check_access logs a warning with stream_id and error message on 403."""
@@ -228,13 +226,11 @@ class TestApplyAccessChecks(unittest.TestCase):
             with self.assertRaises(SurveyMonkeyForbiddenError):
                 _apply_access_checks(_make_forbidden_client(), schemas, field_metadata)
 
-    def test_forbidden_top_level_does_not_raise_when_children_remain(self):
-        """When surveys is forbidden but child streams remain, no error is raised."""
+    def test_all_forbidden_raises_error(self):
+        """When all streams return 403, SurveyMonkeyForbiddenError is raised."""
         schemas, field_metadata = get_schemas()
-        _apply_access_checks(_make_forbidden_client(), schemas, field_metadata)
-        # Child streams still present
-        self.assertIn("survey_details", schemas)
-        self.assertNotIn("surveys", schemas)
+        with self.assertRaises(SurveyMonkeyForbiddenError):
+            _apply_access_checks(_make_forbidden_client(), schemas, field_metadata)
 
     def test_schemas_and_metadata_stay_in_sync(self):
         """schemas and field_metadata always have the same keys after access checks."""
