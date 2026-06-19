@@ -54,11 +54,11 @@ def get_schemas():
 def _apply_access_checks(client, schemas, field_metadata):
     """
     Probe each stream for read access and remove inaccessible streams
-    from schemas and field_metadata in place.
-    check_access() always returns True for child streams (their paths contain
-    placeholders and cannot be independently probed), so this loop effectively
-    identifies only inaccessible top-level streams.
-    Raises SurveyMonkeyForbiddenError if no streams are accessible.
+    (and their children) from schemas and field_metadata in place.
+    Note: check_access() always returns True for child streams, so this loop
+    effectively identifies only inaccessible parent streams by design.
+    Child stream removal is handled separately by _prune_inaccessible_children().
+    Raises SurveyMonkeyForbiddenError if no parent streams are accessible.
     """
     inaccessible_streams = [
         stream_name
@@ -71,6 +71,8 @@ def _apply_access_checks(client, schemas, field_metadata):
         schemas.pop(stream_name, None)
         field_metadata.pop(stream_name, None)
 
+    _prune_inaccessible_children(schemas, field_metadata)
+
     if not schemas:
         raise SurveyMonkeyForbiddenError(
             "No streams are accessible. Ensure the credentials have read permission for at least one stream."
@@ -80,6 +82,21 @@ def _apply_access_checks(client, schemas, field_metadata):
             "These streams have been excluded due to HTTP-Error-Code:403 Forbidden: %s",
             ", ".join(inaccessible_streams),
         )
+
+
+def _prune_inaccessible_children(schemas, field_metadata):
+    """
+    Remove child streams from the catalog whose parent stream was excluded.
+    Mutates schemas and field_metadata in place.
+    """
+    for name, stream_obj in list(STREAMS.items()):
+        if name in schemas and stream_obj.parent and stream_obj.parent not in schemas:
+            LOGGER.warning(
+                "Stream '%s' excluded from catalog because its parent stream '%s' is not accessible.",
+                name, stream_obj.parent,
+            )
+            schemas.pop(name, None)
+            field_metadata.pop(name, None)
 
 
 def discover(client):

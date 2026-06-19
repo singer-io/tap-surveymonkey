@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 from singer.catalog import Catalog
 from singer import metadata
 
-from tap_surveymonkey.discover import discover, get_schemas, get_abs_path, _apply_access_checks
+from tap_surveymonkey.discover import discover, get_schemas, get_abs_path, _apply_access_checks, _prune_inaccessible_children
 from tap_surveymonkey.exceptions import SurveyMonkeyForbiddenError
 from tap_surveymonkey.streams import STREAMS
 
@@ -175,21 +175,23 @@ class TestCheckAccess(unittest.TestCase):
         stream_obj = STREAMS["surveys"]
         self.assertFalse(stream_obj.check_access(client))
 
-    def test_all_streams_checked_when_forbidden(self):
-        """check_access returns False for all streams when API raises 403."""
+    def test_child_stream_always_returns_true(self):
+        """check_access returns True for child streams regardless of client."""
         client = _make_forbidden_client()
         for name, stream_obj in STREAMS.items():
-            with self.subTest(stream=name):
-                self.assertFalse(stream_obj.check_access(client))
+            if stream_obj.parent is not None:
+                with self.subTest(stream=name):
+                    self.assertTrue(stream_obj.check_access(client))
 
-    def test_all_streams_call_api(self):
-        """check_access calls the API for every stream including child streams."""
-        client = _make_accessible_client()
+    def test_child_stream_does_not_call_api(self):
+        """check_access for child streams does not make any API call."""
+        client = _make_forbidden_client()
         for name, stream_obj in STREAMS.items():
-            with self.subTest(stream=name):
-                client.reset_mock()
-                stream_obj.check_access(client)
-                client.make_request.assert_called_once()
+            if stream_obj.parent is not None:
+                with self.subTest(stream=name):
+                    client.reset_mock()
+                    stream_obj.check_access(client)
+                    client.make_request.assert_not_called()
 
     def test_forbidden_logs_warning_with_stream_id_and_error(self):
         """check_access logs a warning with stream_id and error message on 403."""
@@ -214,21 +216,23 @@ class TestApplyAccessChecks(unittest.TestCase):
         _apply_access_checks(_make_accessible_client(), schemas, field_metadata)
         self.assertEqual(set(schemas.keys()), original_keys)
 
-    def test_all_forbidden_raises(self):
-        """When all streams return 403 and schemas are emptied, raises."""
-        # Patch STREAMS down to a single stream to exercise the "no accessible streams" error path.
-        only_top_level = {"surveys": STREAMS["surveys"]}
-        schemas = {"surveys": {"properties": {}}}
-        field_metadata = {"surveys": []}
-        with patch("tap_surveymonkey.discover.STREAMS", only_top_level):
-            with self.assertRaises(SurveyMonkeyForbiddenError):
-                _apply_access_checks(_make_forbidden_client(), schemas, field_metadata)
-
-    def test_all_forbidden_raises_error(self):
-        """When all streams return 403, SurveyMonkeyForbiddenError is raised."""
+    def test_forbidden_parent_excludes_children(self):
+        """When 'surveys' is forbidden, all child streams are also excluded."""
         schemas, field_metadata = get_schemas()
         with self.assertRaises(SurveyMonkeyForbiddenError):
             _apply_access_checks(_make_forbidden_client(), schemas, field_metadata)
+        # surveys is the only parent; all children depend on it
+        self.assertEqual(len(schemas), 0)
+
+    def test_all_forbidden_raises_with_message(self):
+        """When no streams are accessible, the error message mentions credentials."""
+        schemas, field_metadata = get_schemas()
+        with self.assertRaises(SurveyMonkeyForbiddenError) as ctx:
+            _apply_access_checks(_make_forbidden_client(), schemas, field_metadata)
+        self.assertIn(
+            "No streams are accessible. Ensure the credentials have read permission for at least one stream.",
+            str(ctx.exception),
+        )
 
     def test_schemas_and_metadata_stay_in_sync(self):
         """schemas and field_metadata always have the same keys after access checks."""
@@ -236,25 +240,11 @@ class TestApplyAccessChecks(unittest.TestCase):
         _apply_access_checks(_make_accessible_client(), schemas, field_metadata)
         self.assertEqual(set(schemas.keys()), set(field_metadata.keys()))
 
-    def test_all_forbidden_raises_with_message(self):
-        """When no streams are accessible, the error message mentions credentials."""
-        from tap_surveymonkey.streams import Surveys
-        only_top_level = {"surveys": STREAMS["surveys"]}
-        schemas = {"surveys": {"properties": {}}}
-        field_metadata = {"surveys": []}
-        with patch("tap_surveymonkey.discover.STREAMS", only_top_level):
-            with self.assertRaises(SurveyMonkeyForbiddenError) as ctx:
-                _apply_access_checks(_make_forbidden_client(), schemas, field_metadata)
-            self.assertIn(
-                "No streams are accessible. Ensure the credentials have read permission for at least one stream.",
-                str(ctx.exception),
-            )
-
     def test_partial_forbidden_logs_excluded_streams(self):
         """When some parent streams are forbidden, a warning lists the excluded streams."""
         schemas, field_metadata = get_schemas()
 
-        # Add a fake accessible parent so that not ALL schemas are empty
+        # Add a fake accessible parent so that not ALL schemas are empty after pruning
         schemas["_fake_accessible"] = {"properties": {}}
         field_metadata["_fake_accessible"] = []
 
@@ -276,4 +266,41 @@ class TestApplyAccessChecks(unittest.TestCase):
                 mock_logger.warning.assert_any_call(
                     "These streams have been excluded due to HTTP-Error-Code:403 Forbidden: %s",
                     unittest.mock.ANY,
+                )
+
+
+class TestPruneInaccessibleChildren(unittest.TestCase):
+    """Tests for _prune_inaccessible_children() in discover.py."""
+
+    def test_children_removed_when_parent_missing(self):
+        """Child streams are removed if their parent is not in schemas."""
+        schemas, field_metadata = get_schemas()
+        # Remove the parent
+        schemas.pop("surveys", None)
+        field_metadata.pop("surveys", None)
+        _prune_inaccessible_children(schemas, field_metadata)
+        # All remaining streams have parent="surveys", so all should be pruned
+        self.assertEqual(len(schemas), 0)
+        self.assertEqual(len(field_metadata), 0)
+
+    def test_children_kept_when_parent_present(self):
+        """Child streams are kept when their parent is still in schemas."""
+        schemas, field_metadata = get_schemas()
+        original_keys = set(schemas.keys())
+        _prune_inaccessible_children(schemas, field_metadata)
+        self.assertEqual(set(schemas.keys()), original_keys)
+
+    def test_logs_warning_for_each_pruned_child(self):
+        """A warning is logged for each child stream removed due to missing parent."""
+        schemas, field_metadata = get_schemas()
+        schemas.pop("surveys", None)
+        field_metadata.pop("surveys", None)
+        child_streams = [name for name, obj in STREAMS.items() if obj.parent == "surveys"]
+        with patch("tap_surveymonkey.discover.LOGGER") as mock_logger:
+            _prune_inaccessible_children(schemas, field_metadata)
+            self.assertEqual(mock_logger.warning.call_count, len(child_streams))
+            for call_args in mock_logger.warning.call_args_list:
+                self.assertEqual(
+                    call_args[0][0],
+                    "Stream '%s' excluded from catalog because its parent stream '%s' is not accessible.",
                 )
