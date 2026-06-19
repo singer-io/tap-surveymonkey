@@ -43,12 +43,12 @@ def get_schemas():
                                       "inclusion",
                                       "automatic")
 
+        parent_tap_stream_id = getattr(stream_object, "parent", None)
+        if parent_tap_stream_id:
+            meta = metadata.write(meta, (), 'parent-tap-stream-id', parent_tap_stream_id)
+
         meta = metadata.to_list(meta)
-        parent = getattr(stream_object, "parent_stream", None)
-        if parent:
-            parent_id = parent.path
-            data = meta[0].setdefault("metadata", {})
-            data['parent-tap-stream-id'] = parent_id
+
         schemas[stream_name] = schema
         schemas_metadata[stream_name] = meta
 
@@ -57,17 +57,15 @@ def get_schemas():
 
 def _apply_access_checks(client, schemas, field_metadata):
     """
-    Probe each stream for read access and remove inaccessible streams
+    Probe each parent stream for read access and remove inaccessible streams
     (and their children) from schemas and field_metadata in place.
-    Note: check_access() always returns True for child streams, so this loop
-    effectively identifies only inaccessible parent streams by design.
-    Child stream removal is handled separately by _prune_inaccessible_children().
     Raises SurveyMonkeyForbiddenError if no parent streams are accessible.
     """
     inaccessible_streams = [
         stream_name
         for stream_name, stream_obj in STREAMS.items()
         if stream_name in schemas
+        and not stream_obj.parent
         and not stream_obj.check_access(client)
     ]
 
