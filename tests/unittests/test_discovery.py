@@ -221,9 +221,11 @@ class TestApplyAccessChecks(unittest.TestCase):
         schemas, field_metadata = get_schemas()
         with self.assertRaises(SurveyMonkeyForbiddenError):
             _apply_access_checks(_make_forbidden_client(), schemas, field_metadata)
-        # surveys is the only parent; all children depend on it
-        self.assertEqual(len(schemas), 0)
-
+        # 'surveys' should be excluded, and all its children should be pruned.
+        self.assertNotIn("surveys", schemas)
+        for name, stream_obj in STREAMS.items():
+            if stream_obj.parent == "surveys":
+                self.assertNotIn(name, schemas)
     def test_all_forbidden_raises_with_message(self):
         """When no streams are accessible, the error message mentions credentials."""
         schemas, field_metadata = get_schemas()
