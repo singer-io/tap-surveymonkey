@@ -44,7 +44,11 @@ def get_schemas():
                                       "automatic")
 
         meta = metadata.to_list(meta)
-
+        parent = getattr(stream_object, "parent_stream", None)
+        if parent:
+            parent_id = parent.path
+            data = meta[0].setdefault("metadata", {})
+            data['parent-tap-stream-id'] = parent_id
         schemas[stream_name] = schema
         schemas_metadata[stream_name] = meta
 

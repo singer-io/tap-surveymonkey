@@ -9,6 +9,7 @@
 
 ## 2.2.2
   * Fix TypeError in parent_row path substitution [#43](https://github.com/singer-io/tap-surveymonkey/pull/43)
+  * Adding Parent relationship to child streams [#39](https://github.com/singer-io/tap-surveymonkey/pull/39)
 
 ## 2.2.1
   * Add `backoff` as an explicit install dependency [#44](https://github.com/singer-io/tap-surveymonkey/pull/44)
