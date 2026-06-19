@@ -1,6 +1,7 @@
 """Integration tests for tap-surveymonkey stream discovery with mocked data.
 
-discover() reads schema JSON files from disk — no HTTP calls are made.
+discover() performs access checks via the provided client; in these tests
+the client is mocked so no real HTTP calls are made.
 Run with: python -m pytest tests/test_discovery.py -v
 """
 import sys
@@ -21,7 +22,7 @@ class SurveyMonkeyDiscoveryTest(SurveyMonkeyBaseTest, unittest.TestCase):
     """Verify tap discovery returns the correct catalog structure."""
 
     def _get_catalog(self):
-        """Run discover() — reads schema files, no HTTP required."""
+        """Run discover() with a mocked client — no real HTTP calls."""
         return discover(MagicMock())
 
     # ── Stream presence ──────────────────────────────────────────────────────

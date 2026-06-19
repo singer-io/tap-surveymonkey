@@ -179,7 +179,7 @@ class TestCheckAccess(unittest.TestCase):
         """check_access returns True for child streams regardless of client."""
         client = _make_forbidden_client()
         for name, stream_obj in STREAMS.items():
-            if stream_obj.parent is not None:
+            if stream_obj.parent_tap_stream_id is not None:
                 with self.subTest(stream=name):
                     self.assertTrue(stream_obj.check_access(client))
 
@@ -187,7 +187,7 @@ class TestCheckAccess(unittest.TestCase):
         """check_access for child streams does not make any API call."""
         client = _make_forbidden_client()
         for name, stream_obj in STREAMS.items():
-            if stream_obj.parent is not None:
+            if stream_obj.parent_tap_stream_id is not None:
                 with self.subTest(stream=name):
                     client.reset_mock()
                     stream_obj.check_access(client)
@@ -224,7 +224,7 @@ class TestApplyAccessChecks(unittest.TestCase):
         # 'surveys' should be excluded, and all its children should be pruned.
         self.assertNotIn("surveys", schemas)
         for name, stream_obj in STREAMS.items():
-            if stream_obj.parent == "surveys":
+            if stream_obj.parent_tap_stream_id == "surveys":
                 self.assertNotIn(name, schemas)
     def test_all_forbidden_raises_with_message(self):
         """When no streams are accessible, the error message mentions credentials."""
@@ -297,7 +297,7 @@ class TestPruneInaccessibleChildren(unittest.TestCase):
         schemas, field_metadata = get_schemas()
         schemas.pop("surveys", None)
         field_metadata.pop("surveys", None)
-        child_streams = [name for name, obj in STREAMS.items() if obj.parent == "surveys"]
+        child_streams = [name for name, obj in STREAMS.items() if obj.parent_tap_stream_id == "surveys"]
         with patch("tap_surveymonkey.discover.LOGGER") as mock_logger:
             _prune_inaccessible_children(schemas, field_metadata)
             self.assertEqual(mock_logger.warning.call_count, len(child_streams))

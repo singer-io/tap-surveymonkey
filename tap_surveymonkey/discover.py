@@ -43,7 +43,7 @@ def get_schemas():
                                       "inclusion",
                                       "automatic")
 
-        parent_tap_stream_id = getattr(stream_object, "parent", None)
+        parent_tap_stream_id = getattr(stream_object, "parent_tap_stream_id", None)
         if parent_tap_stream_id:
             meta = metadata.write(meta, (), 'parent-tap-stream-id', parent_tap_stream_id)
 
@@ -65,7 +65,7 @@ def _apply_access_checks(client, schemas, field_metadata):
         stream_name
         for stream_name, stream_obj in STREAMS.items()
         if stream_name in schemas
-        and not stream_obj.parent
+        and not stream_obj.parent_tap_stream_id
         and not stream_obj.check_access(client)
     ]
 
@@ -92,24 +92,25 @@ def _prune_inaccessible_children(schemas, field_metadata):
     Mutates schemas and field_metadata in place.
     """
     for name, stream_obj in list(STREAMS.items()):
-        if name in schemas and stream_obj.parent and stream_obj.parent not in schemas:
+        if name in schemas and stream_obj.parent_tap_stream_id and stream_obj.parent_tap_stream_id not in schemas:
             LOGGER.warning(
                 "Stream '%s' excluded from catalog because its parent stream '%s' is not accessible.",
-                name, stream_obj.parent,
+                name, stream_obj.parent_tap_stream_id,
             )
             schemas.pop(name, None)
             field_metadata.pop(name, None)
 
 
-def discover(client):
+def discover(client=None):
     """
     Builds the singer catalog for all the streams in the schemas directory.
-    Access to each stream is verified using the provided client and streams
+    When a client is provided, access to each stream is verified and streams
     the credentials cannot read are excluded from the returned catalog.
     """
 
     schemas, schemas_metadata = get_schemas()
-    _apply_access_checks(client, schemas, schemas_metadata)
+    if client:
+        _apply_access_checks(client, schemas, schemas_metadata)
 
     streams = []
 
