@@ -4,6 +4,7 @@ import singer.utils
 from singer import metadata
 
 from tap_surveymonkey.client import SurveyMonkeyClient
+from tap_surveymonkey.exceptions import SurveyMonkeyForbiddenError
 
 
 LOGGER = singer.get_logger()
@@ -55,12 +56,35 @@ class Stream:
     replication_key_from_parent = False # for streams which just return a single record and iterate by its parent, e.g. "SurveyDetails"
     is_sorted = False # indicate whether data is sorted ascending on bookmark value
     mandatory_properties = []
+    parent_tap_stream_id = None  # parent stream name in STREAMS dict; None for top-level streams
 
     def __init__(self, stream_id: str, path: str, parent_stream = None):
         self.stream_id = stream_id
         self.path = path
         self._params = {}
         self.parent_stream = parent_stream
+
+    def check_access(self, client):
+        """
+        Verify that the API credentials have read access to this stream.
+        Returns True if accessible, False if a 403 Forbidden error is raised.
+        Child streams always return True (access is governed by the parent check).
+        This means children are never flagged by the access-check loop in
+        _apply_access_checks(); their removal from the catalog is handled
+        separately by _prune_inaccessible_children().
+        """
+        if self.parent_tap_stream_id:
+            return True
+        try:
+            client.make_request(self.path, params={"per_page": 1, "page": 1})
+            return True
+        except SurveyMonkeyForbiddenError as exc:
+            LOGGER.warning(
+                "Unauthorized Stream: %s, excluding from catalog. HTTP-Error-Message: '%s'",
+                self.stream_id,
+                exc,
+            )
+            return False
 
     def format_response(self, response):
         return response
@@ -212,6 +236,7 @@ class SurveyDetails(Stream):
     replication_key = "date_modified"
     replication_key_from_parent = True
     is_sorted = True
+    parent_tap_stream_id = "surveys"
 
     def _modify_record(self, raw_record):
         super()._modify_record(raw_record)
@@ -224,6 +249,7 @@ class Responses(PaginatedStream):
     replication_method = "INCREMENTAL"
     replication_key = "date_modified"
     is_sorted = True
+    parent_tap_stream_id = "surveys"
 
     def __init__(self, stream_id: str, path: str, parent_stream, simple: bool = False):
         super().__init__(stream_id=stream_id, path=path, parent_stream=parent_stream)
