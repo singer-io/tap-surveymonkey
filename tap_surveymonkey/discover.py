@@ -37,13 +37,13 @@ def get_schemas():
                                       ("properties", replication_key),
                                       "inclusion",
                                       "automatic")
+                
+        parent_tap_stream_id = getattr(stream_object, "parent_tap_stream_id", None)
+        if parent_tap_stream_id:
+            meta = metadata.write(meta, (), 'parent-tap-stream-id', parent_tap_stream_id)
 
         meta = metadata.to_list(meta)
-        parent = getattr(stream_object, "parent_stream", None)
-        if parent:
-            parent_id = parent.path
-            data = meta[0].setdefault("metadata", {})
-            data['parent-tap-stream-id'] = parent_id
+
         schemas[stream_name] = schema
         schemas_metadata[stream_name] = meta
 
