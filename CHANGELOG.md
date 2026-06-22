@@ -1,8 +1,14 @@
 # Changelog
 
+## 3.1.0
+  * Adding Parent relationship to child streams [#39](https://github.com/singer-io/tap-surveymonkey/pull/39)
+
+## 3.0.0
+  * Bump `requests` to 2.34.2 to address CVE security advisories [#48](https://github.com/singer-io/tap-surveymonkey/pull/48)
+  * **Breaking change for existing users:** PR [#44](https://github.com/singer-io/tap-surveymonkey/pull/44) introduced explicit `key_properties = ["id"]` for all streams; Singer targets (e.g. BigQuery) that previously ingested data without `key_properties` and stored `__sdc_primary_key` as the primary key must update their primary key metadata to `id` before loading new data
+
 ## 2.2.2
   * Fix TypeError in parent_row path substitution [#43](https://github.com/singer-io/tap-surveymonkey/pull/43)
-  * Adding Parent relationship to child streams [#39](https://github.com/singer-io/tap-surveymonkey/pull/39)
 
 ## 2.2.1
   * Add `backoff` as an explicit install dependency [#44](https://github.com/singer-io/tap-surveymonkey/pull/44)
