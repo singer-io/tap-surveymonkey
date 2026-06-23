@@ -130,3 +130,48 @@ class SurveyMonkeyDiscoveryTest(SurveyMonkeyBaseTest, unittest.TestCase):
                 schema_props = entry.schema.to_dict()["properties"]
                 for pk in pks:
                     self.assertIn(pk, schema_props)
+
+    # ── Parent-child metadata ────────────────────────────────────────────────
+
+    def test_discovery_child_streams_have_parent_tap_stream_id(self):
+        """Child streams have parent-tap-stream-id set in their catalog metadata."""
+        catalog = self._get_catalog()
+        expected = self.expected_metadata()
+        for entry in catalog.streams:
+            stream_meta = expected[entry.tap_stream_id]
+            expected_parent = stream_meta.get(self.PARENT_STREAM)
+            mdata = metadata.to_map(entry.metadata)
+            actual_parent = metadata.get(mdata, (), "parent-tap-stream-id")
+            with self.subTest(stream=entry.tap_stream_id):
+                if expected_parent:
+                    self.assertEqual(actual_parent, expected_parent)
+                else:
+                    self.assertIsNone(actual_parent)
+
+    def test_discovery_surveys_has_no_parent(self):
+        """The surveys stream (top-level) has no parent-tap-stream-id metadata."""
+        catalog = self._get_catalog()
+        entry = next(e for e in catalog.streams if e.tap_stream_id == "surveys")
+        mdata = metadata.to_map(entry.metadata)
+        self.assertIsNone(metadata.get(mdata, (), "parent-tap-stream-id"))
+
+    def test_discovery_survey_details_parent_is_surveys(self):
+        """survey_details has parent-tap-stream-id=surveys in metadata."""
+        catalog = self._get_catalog()
+        entry = next(e for e in catalog.streams if e.tap_stream_id == "survey_details")
+        mdata = metadata.to_map(entry.metadata)
+        self.assertEqual(metadata.get(mdata, (), "parent-tap-stream-id"), "surveys")
+
+    def test_discovery_responses_parent_is_surveys(self):
+        """responses has parent-tap-stream-id=surveys in metadata."""
+        catalog = self._get_catalog()
+        entry = next(e for e in catalog.streams if e.tap_stream_id == "responses")
+        mdata = metadata.to_map(entry.metadata)
+        self.assertEqual(metadata.get(mdata, (), "parent-tap-stream-id"), "surveys")
+
+    def test_discovery_simplified_responses_parent_is_surveys(self):
+        """simplified_responses has parent-tap-stream-id=surveys in metadata."""
+        catalog = self._get_catalog()
+        entry = next(e for e in catalog.streams if e.tap_stream_id == "simplified_responses")
+        mdata = metadata.to_map(entry.metadata)
+        self.assertEqual(metadata.get(mdata, (), "parent-tap-stream-id"), "surveys")
