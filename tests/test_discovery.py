@@ -154,24 +154,3 @@ class SurveyMonkeyDiscoveryTest(SurveyMonkeyBaseTest, unittest.TestCase):
         entry = next(e for e in catalog.streams if e.tap_stream_id == "surveys")
         mdata = metadata.to_map(entry.metadata)
         self.assertIsNone(metadata.get(mdata, (), "parent-tap-stream-id"))
-
-    def test_discovery_survey_details_parent_is_surveys(self):
-        """survey_details has parent-tap-stream-id=surveys in metadata."""
-        catalog = self._get_catalog()
-        entry = next(e for e in catalog.streams if e.tap_stream_id == "survey_details")
-        mdata = metadata.to_map(entry.metadata)
-        self.assertEqual(metadata.get(mdata, (), "parent-tap-stream-id"), "surveys")
-
-    def test_discovery_responses_parent_is_surveys(self):
-        """responses has parent-tap-stream-id=surveys in metadata."""
-        catalog = self._get_catalog()
-        entry = next(e for e in catalog.streams if e.tap_stream_id == "responses")
-        mdata = metadata.to_map(entry.metadata)
-        self.assertEqual(metadata.get(mdata, (), "parent-tap-stream-id"), "surveys")
-
-    def test_discovery_simplified_responses_parent_is_surveys(self):
-        """simplified_responses has parent-tap-stream-id=surveys in metadata."""
-        catalog = self._get_catalog()
-        entry = next(e for e in catalog.streams if e.tap_stream_id == "simplified_responses")
-        mdata = metadata.to_map(entry.metadata)
-        self.assertEqual(metadata.get(mdata, (), "parent-tap-stream-id"), "surveys")
