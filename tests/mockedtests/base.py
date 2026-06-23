@@ -163,7 +163,7 @@ class SurveyMonkeyBaseTest:
     # ── Schema-driven mock data generation ─────────────────────────────────
     @staticmethod
     def _schema_path(stream_name):
-        base_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
         return os.path.join(base_dir, "tap_surveymonkey", "schemas",
                             f"{stream_name}.json")
 
