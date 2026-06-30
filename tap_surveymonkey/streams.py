@@ -55,6 +55,7 @@ class Stream:
     replication_key_from_parent = False # for streams which just return a single record and iterate by its parent, e.g. "SurveyDetails"
     is_sorted = False # indicate whether data is sorted ascending on bookmark value
     mandatory_properties = []
+    parent = None
 
     def __init__(self, stream_id: str, path: str, parent_stream = None):
         self.stream_id = stream_id
@@ -212,6 +213,7 @@ class SurveyDetails(Stream):
     replication_key = "date_modified"
     replication_key_from_parent = True
     is_sorted = True
+    parent = "surveys"
 
     def _modify_record(self, raw_record):
         super()._modify_record(raw_record)
@@ -224,6 +226,7 @@ class Responses(PaginatedStream):
     replication_method = "INCREMENTAL"
     replication_key = "date_modified"
     is_sorted = True
+    parent = "surveys"
 
     def __init__(self, stream_id: str, path: str, parent_stream, simple: bool = False):
         super().__init__(stream_id=stream_id, path=path, parent_stream=parent_stream)

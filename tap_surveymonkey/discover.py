@@ -37,6 +37,10 @@ def get_schemas():
                                       ("properties", replication_key),
                                       "inclusion",
                                       "automatic")
+                
+        parent_tap_stream_id = getattr(stream_object, "parent", None)
+        if parent_tap_stream_id:
+            meta = metadata.write(meta, (), 'parent-tap-stream-id', parent_tap_stream_id)
 
         meta = metadata.to_list(meta)
 
