@@ -51,6 +51,17 @@ class TestClientInit(unittest.TestCase):
         self.assertEqual(client.access_token, "my-token")
 
 
+class TestClientTokenValidation(unittest.TestCase):
+
+    @patch.object(SurveyMonkeyClient, "make_request")
+    def test_validate_access_token_calls_users_me_endpoint(self, mock_make_request):
+        """validate_access_token checks token by calling users/me."""
+        client = SurveyMonkeyClient("my-token")
+        client.validate_access_token()
+
+        mock_make_request.assert_called_once_with("users/me")
+
+
 # ---------------------------------------------------------------------------
 # make_request � happy path
 # ---------------------------------------------------------------------------
