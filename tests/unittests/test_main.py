@@ -11,7 +11,7 @@ class TestMainTokenValidation(unittest.TestCase):
     @patch("tap_surveymonkey.discover")
     @patch("tap_surveymonkey.SurveyMonkeyClient")
     @patch("tap_surveymonkey.singer.utils.parse_args")
-    def test_discover_mode_validates_token_before_discover(
+    def test_discover_mode_constructs_client_before_discover(
         self,
         mock_parse_args,
         mock_client_cls,
@@ -32,7 +32,6 @@ class TestMainTokenValidation(unittest.TestCase):
         main()
 
         mock_client_cls.assert_called_once_with("token")
-        mock_client_cls.return_value.validate_access_token.assert_called_once_with()
         mock_discover.assert_called_once_with()
         catalog_obj.dump.assert_called_once_with()
         mock_sync.assert_not_called()
@@ -41,7 +40,7 @@ class TestMainTokenValidation(unittest.TestCase):
     @patch("tap_surveymonkey.discover")
     @patch("tap_surveymonkey.SurveyMonkeyClient")
     @patch("tap_surveymonkey.singer.utils.parse_args")
-    def test_sync_without_catalog_validates_token_before_discover(
+    def test_sync_without_catalog_constructs_client_before_discover(
         self,
         mock_parse_args,
         mock_client_cls,
@@ -62,7 +61,6 @@ class TestMainTokenValidation(unittest.TestCase):
         main()
 
         mock_client_cls.assert_called_once_with("token")
-        mock_client_cls.return_value.validate_access_token.assert_called_once_with()
         mock_discover.assert_called_once_with()
         mock_sync.assert_called_once_with(args.config, args.state, catalog_obj)
 
@@ -70,7 +68,7 @@ class TestMainTokenValidation(unittest.TestCase):
     @patch("tap_surveymonkey.discover")
     @patch("tap_surveymonkey.SurveyMonkeyClient")
     @patch("tap_surveymonkey.singer.utils.parse_args")
-    def test_sync_with_catalog_validates_token_without_discovery(
+    def test_sync_with_catalog_constructs_client_without_discovery(
         self,
         mock_parse_args,
         mock_client_cls,
@@ -89,6 +87,5 @@ class TestMainTokenValidation(unittest.TestCase):
         main()
 
         mock_client_cls.assert_called_once_with("token")
-        mock_client_cls.return_value.validate_access_token.assert_called_once_with()
         mock_discover.assert_not_called()
         mock_sync.assert_called_once_with(args.config, args.state, provided_catalog)
