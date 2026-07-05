@@ -89,9 +89,6 @@ def _on_backoff(details):
 class SurveyMonkeyClient:
     def __init__(self, access_token):
         self.access_token = access_token
-
-    def validate_access_token(self):
-        """Validate access token by calling a lightweight authenticated endpoint."""
         self.make_request("users/me")
 
     @backoff.on_exception(

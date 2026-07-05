@@ -17,7 +17,6 @@ def main():
     args = singer.utils.parse_args(REQUIRED_CONFIG_KEYS)
 
     client = SurveyMonkeyClient(args.config["access_token"])
-    client.validate_access_token()
 
     # If discover flag was passed, run discovery mode
     if args.discover:
