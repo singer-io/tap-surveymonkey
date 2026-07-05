@@ -30,11 +30,13 @@ class SurveyMonkeyPaginationTest(SurveyMonkeyBaseTest, unittest.TestCase):
     @patch("tap_surveymonkey.client.requests.request")
     def test_surveys_fetches_multiple_pages(self, mock_req):
         """surveys stream should keep fetching pages until no 'next' link."""
+        auth_resp = MockResponse({"id": "me"})
         page1_data = [{"id": f"s{i}", "date_modified": "2024-01-01T00:00:00.000000Z"}
                       for i in range(50)]
         page2_data = [{"id": "s_extra", "date_modified": "2024-01-02T00:00:00.000000Z"}]
 
         mock_req.side_effect = [
+            auth_resp,                        # SurveyMonkeyClient __init__ token check
             _page(page1_data, has_next=True),   # page 1 → has next
             _page(page2_data, has_next=False),  # page 2 → stop
         ]
@@ -50,15 +52,19 @@ class SurveyMonkeyPaginationTest(SurveyMonkeyBaseTest, unittest.TestCase):
 
         surveys_written = [r for s, r in records_written if s == "surveys"]
         self.assertEqual(len(surveys_written), 51)
-        self.assertEqual(mock_req.call_count, 2)
+        self.assertEqual(mock_req.call_count, 3)
 
     @patch("tap_surveymonkey.client.requests.request")
     def test_surveys_single_page_stops_correctly(self, mock_req):
         """surveys stream stops after one page when no 'next' link is present."""
+        auth_resp = MockResponse({"id": "me"})
         data = [{"id": f"s{i}", "date_modified": "2024-01-01T00:00:00.000000Z"}
                 for i in range(5)]
 
-        mock_req.return_value = _page(data, has_next=False)
+        mock_req.side_effect = [
+            auth_resp,                        # SurveyMonkeyClient __init__ token check
+            _page(data, has_next=False),
+        ]
 
         catalog = self._make_catalog(["surveys"])
         records_written = []
@@ -71,7 +77,7 @@ class SurveyMonkeyPaginationTest(SurveyMonkeyBaseTest, unittest.TestCase):
 
         surveys_written = [r for s, r in records_written if s == "surveys"]
         self.assertEqual(len(surveys_written), 5)
-        self.assertEqual(mock_req.call_count, 1)
+        self.assertEqual(mock_req.call_count, 2)
 
     # ── responses — paginated ─────────────────────────────────────────────────
 
