@@ -42,7 +42,7 @@ class SurveyMonkeyBaseTest:
     ┌──────────────────────┬───────────┬─────────────┬────────────────┬────────────┬──────────────────┬─────────────┐
     │ stream_name          │ prim_keys │ rep_method  │ rep_keys       │ api_limit  │ obeys_start_date │ parent      │
     ├──────────────────────┼───────────┼─────────────┼────────────────┼────────────┼──────────────────┼─────────────┤
-    │ surveys              │ {id}      │ INCREMENTAL │ {date_modified}│ 50         │ True             │ None        │
+    │ surveys              │ {id}      │ INCREMENTAL │ {date_modified}│ 50         │ True             │ —           │
     │ survey_details       │ {id}      │ INCREMENTAL │ {date_modified}│ 50         │ True             │ surveys     │
     │ responses            │ {id}      │ INCREMENTAL │ {date_modified}│ 50         │ True             │ surveys     │
     │ simplified_responses │ {id}      │ INCREMENTAL │ {date_modified}│ 50         │ True             │ surveys     │
@@ -55,6 +55,8 @@ class SurveyMonkeyBaseTest:
     REPLICATION_KEYS   = "replication_keys"
     OBEYS_START_DATE   = "obeys_start_date"
     API_LIMIT          = "api_limit"
+    PARENT_STREAM      = "parent_stream"
+    IS_FORBIDDEN_STREAM = "is_forbidden_stream"
     INCREMENTAL        = "INCREMENTAL"
     FULL_TABLE         = "FULL_TABLE"
 
@@ -78,6 +80,7 @@ class SurveyMonkeyBaseTest:
                 cls.REPLICATION_KEYS:   {"date_modified"},
                 cls.OBEYS_START_DATE:   True,
                 cls.API_LIMIT:          50,
+                cls.PARENT_STREAM:      "surveys",
             },
             "responses": {
                 cls.PRIMARY_KEYS:       {"id"},
@@ -85,6 +88,7 @@ class SurveyMonkeyBaseTest:
                 cls.REPLICATION_KEYS:   {"date_modified"},
                 cls.OBEYS_START_DATE:   True,
                 cls.API_LIMIT:          50,
+                cls.PARENT_STREAM:      "surveys",
             },
             "simplified_responses": {
                 cls.PRIMARY_KEYS:       {"id"},
@@ -92,7 +96,16 @@ class SurveyMonkeyBaseTest:
                 cls.REPLICATION_KEYS:   {"date_modified"},
                 cls.OBEYS_START_DATE:   True,
                 cls.API_LIMIT:          50,
+                cls.PARENT_STREAM:      "surveys",
             },
+        }
+
+    def expected_stream_names(self):
+        """The expected stream names, excludes forbidden streams."""
+        return {
+            stream_name
+            for stream_name, meta in self.expected_metadata().items()
+            if not meta.get(self.IS_FORBIDDEN_STREAM, False)
         }
 
     # ── Setup / teardown ────────────────────────────────────────────────────
@@ -150,7 +163,7 @@ class SurveyMonkeyBaseTest:
     # ── Schema-driven mock data generation ─────────────────────────────────
     @staticmethod
     def _schema_path(stream_name):
-        base_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
         return os.path.join(base_dir, "tap_surveymonkey", "schemas",
                             f"{stream_name}.json")
 
