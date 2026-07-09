@@ -1,5 +1,6 @@
 import unittest
 import runpy
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
@@ -113,8 +114,9 @@ class TestMainEntrypoint(unittest.TestCase):
         )
         mock_parse_args.return_value = args
 
+        package_entrypoint = Path(__file__).resolve().parents[2] / "tap_surveymonkey" / "__init__.py"
         runpy.run_path(
-            "/home/akkumar/projects/taps/tap-surveymonkey/tap_surveymonkey/__init__.py",
+            str(package_entrypoint),
             run_name="__main__",
         )
 
