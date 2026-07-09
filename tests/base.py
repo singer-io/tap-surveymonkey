@@ -76,3 +76,26 @@ class SurveyMonkeyBaseTest(BaseCase):
 
         props["start_date"] = self.start_date
         return props
+
+    def get_bookmark_value(self, state, stream):
+        """Return the bookmark value for a stream from tap-surveymonkey state format.
+
+        The tap stores stream bookmarks keyed by survey identifier (or full_sync),
+        not by replication key name. For compatibility with tap-tester base suites,
+        return the latest bookmark value present for the stream.
+        """
+        stream_bookmark = state.get("bookmarks", {}).get(stream, {})
+        if not stream_bookmark or not isinstance(stream_bookmark, dict):
+            return None
+
+        replication_keys = self.expected_replication_keys(stream)
+        if replication_keys:
+            replication_key = next(iter(replication_keys))
+            if replication_key in stream_bookmark:
+                return stream_bookmark.get(replication_key)
+
+        values = [value for value in stream_bookmark.values() if isinstance(value, str)]
+        if not values:
+            return None
+
+        return max(values)
