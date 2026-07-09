@@ -18,6 +18,9 @@ setup(
         'dev': [
             'ipdb',
             'pylint',
+            'pytest-cov',
+            'coverage',
+            'pytest',
             'urllib3==2.7.0'
         ]
     },

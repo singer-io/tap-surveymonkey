@@ -75,6 +75,23 @@ class TestGetSchemas(unittest.TestCase):
             with self.subTest(stream=stream_name):
                 self.assertIsInstance(meta, list)
 
+    @unittest.mock.patch("tap_surveymonkey.discover.utils.load_json")
+    @unittest.mock.patch("tap_surveymonkey.discover.STREAMS")
+    def test_non_incremental_stream_uses_no_replication_keys(self, mock_streams, mock_load_json):
+        """Non-incremental streams pass through get_schemas without replication keys."""
+        non_incremental_stream = unittest.mock.MagicMock()
+        non_incremental_stream.replication_method = "FULL_TABLE"
+        non_incremental_stream.replication_key = None
+        non_incremental_stream.key_properties = ["id"]
+        non_incremental_stream.parent = None
+        mock_streams.items.return_value = [("dummy", non_incremental_stream)]
+        mock_load_json.return_value = {"properties": {"id": {"type": "string"}}}
+
+        schemas, schemas_metadata = get_schemas()
+
+        self.assertIn("dummy", schemas)
+        self.assertIn("dummy", schemas_metadata)
+
 
 class TestDiscover(unittest.TestCase):
 

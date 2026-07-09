@@ -21,13 +21,26 @@ jobs:
           name: 'Unit Tests'
           command: |
             source /usr/local/share/virtualenvs/tap-surveymonkey/bin/activate
-            uv pip install pytest parameterized coverage
-            coverage run -m pytest tests/unittests
+            mkdir -p test_output
+            pytest --cov=tap_surveymonkey --cov-report=term-missing --junitxml=test_output/unittests.xml tests/unittests
+          when: always
       - run:
           name: 'Mocked Integration Tests'
           command: |
             source /usr/local/share/virtualenvs/tap-surveymonkey/bin/activate
-            pytest tests/mockedtests -v
+            pytest --cov=tap_surveymonkey --cov-report=term-missing --junitxml=test_output/mockedtests.xml tests/mockedtests -v
+          when: always
+      - run:
+          name: 'Coverage Report'
+          command: |
+            source /usr/local/share/virtualenvs/tap-surveymonkey/bin/activate
+            pytest --cov=tap_surveymonkey --cov-report=term-missing --junitxml=test_output/all_tests.xml tests/unittests tests/mockedtests
+            coverage html
+          when: always
+      - store_test_results:
+          path: test_output
+      - store_artifacts:
+          path: htmlcov
       # TODO: Uncomment when credentials are available in CI environment
       # - run:
       #     name: 'Integration Tests'

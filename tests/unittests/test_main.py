@@ -1,4 +1,5 @@
 import unittest
+import runpy
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
@@ -89,3 +90,34 @@ class TestMainTokenValidation(unittest.TestCase):
         mock_client_cls.assert_called_once_with("token")
         mock_discover.assert_not_called()
         mock_sync.assert_called_once_with(args.config, args.state, provided_catalog)
+
+
+class TestMainEntrypoint(unittest.TestCase):
+
+    @patch("tap_surveymonkey.sync.sync")
+    @patch("tap_surveymonkey.discover.discover")
+    @patch("tap_surveymonkey.client.SurveyMonkeyClient")
+    @patch("singer.utils.parse_args")
+    def test_run_as_main_invokes_main_block(
+        self,
+        mock_parse_args,
+        mock_client_cls,
+        mock_discover,
+        mock_sync,
+    ):
+        args = SimpleNamespace(
+            discover=False,
+            catalog=MagicMock(),
+            config={"access_token": "token"},
+            state={"bookmarks": {}},
+        )
+        mock_parse_args.return_value = args
+
+        runpy.run_path(
+            "/home/akkumar/projects/taps/tap-surveymonkey/tap_surveymonkey/__init__.py",
+            run_name="__main__",
+        )
+
+        mock_client_cls.assert_called_once_with("token")
+        mock_sync.assert_called_once_with(args.config, args.state, args.catalog)
+        mock_discover.assert_not_called()

@@ -235,3 +235,21 @@ class TestSyncWriteState(unittest.TestCase):
 
         # 1 write_state per record (sorted bookmark) + 1 for full_sync at the end
         self.assertGreaterEqual(mock_write_state.call_count, 2)
+
+    def test_surveys_with_survey_id_falls_back_to_full_sync_bookmark(self):
+        """Surveys sync checks the full_sync bookmark when a survey_id bookmark is absent."""
+        stream_obj = _make_stream_obj("surveys", records=[])
+        mock_streams = {"surveys": stream_obj}
+        mock_catalog = MagicMock()
+        mock_catalog.get_selected_streams.return_value = [_make_catalog_entry("surveys")]
+
+        with patch("tap_surveymonkey.sync.SurveyMonkeyClient"), \
+             patch("tap_surveymonkey.sync.STREAMS", mock_streams), \
+             patch("tap_surveymonkey.sync.bookmarks.get_bookmark", side_effect=[None, None]) as mock_get_bookmark, \
+             patch("tap_surveymonkey.sync.singer.write_schema"), \
+             patch("tap_surveymonkey.sync.singer.write_record"), \
+             patch("tap_surveymonkey.sync.singer.write_state"):
+            sync({"access_token": "tok", "survey_id": "survey-1"}, {"bookmarks": {}}, mock_catalog)
+
+        self.assertEqual(mock_get_bookmark.call_args_list[0][0][1:], ("surveys", "survey-1"))
+        self.assertEqual(mock_get_bookmark.call_args_list[1][0][1:], ("surveys", "full_sync"))
