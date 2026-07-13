@@ -45,20 +45,19 @@ def _make_resp(status_code, json_data=None, headers=None, text=""):
 
 class TestClientInit(unittest.TestCase):
 
-    @patch.object(SurveyMonkeyClient, "make_request")
-    def test_stores_access_token(self, mock_make_request):
+    def test_stores_access_token(self):
         """Client stores the access_token passed at construction."""
         client = SurveyMonkeyClient("my-token")
         self.assertEqual(client.access_token, "my-token")
-        mock_make_request.assert_called_once_with("users/me")
 
 
 class TestClientTokenValidation(unittest.TestCase):
 
     @patch.object(SurveyMonkeyClient, "make_request")
-    def test_init_calls_users_me_endpoint_for_token_validation(self, mock_make_request):
-        """Client init validates token by calling users/me."""
-        SurveyMonkeyClient("my-token")
+    def test_validate_token_calls_users_me_endpoint(self, mock_make_request):
+        """Client.validate_token() calls users/me endpoint."""
+        client = SurveyMonkeyClient("my-token")
+        client.validate_token()
         mock_make_request.assert_called_once_with("users/me")
 
 
