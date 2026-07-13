@@ -16,18 +16,19 @@ def main():
     # Parse command line arguments
     args = singer.utils.parse_args(REQUIRED_CONFIG_KEYS)
 
-    with SurveyMonkeyClient(args.config["access_token"]) as client:
-        # If discover flag was passed, run discovery mode
-        if args.discover:
-            catalog = discover().dump()
-        # Otherwise run in sync mode
-        else:
-            if args.catalog:
-                catalog = args.catalog
-            else:
-                catalog = discover()
+    client = SurveyMonkeyClient(args.config["access_token"])
 
-            sync(args.config, args.state, catalog)
+    # If discover flag was passed, run discovery mode
+    if args.discover:
+        catalog = discover().dump()
+    # Otherwise run in sync mode
+    else:
+        if args.catalog:
+            catalog = args.catalog
+        else:
+            catalog = discover()
+
+        sync(args.config, args.state, catalog)
 
 
 if __name__ == "__main__":
