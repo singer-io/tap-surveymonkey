@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.2.0
+  * Add fix for unauthorized access [#51](https://github.com/singer-io/tap-surveymonkey/pull/51)
+  * Add Integration tests
+
 ## 3.1.0
   * Adding Parent relationship to child streams [#39](https://github.com/singer-io/tap-surveymonkey/pull/39)
 
