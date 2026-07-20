@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="tap-surveymonkey",
-    version="3.1.0",
+    version="3.2.0",
     description="Singer.io tap for extracting data",
     author="Stitch",
     url="http://singer.io",
@@ -18,6 +18,9 @@ setup(
         'dev': [
             'ipdb',
             'pylint',
+            'pytest-cov',
+            'coverage',
+            'pytest',
             'urllib3==2.7.0'
         ]
     },

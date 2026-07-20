@@ -45,10 +45,21 @@ def _make_resp(status_code, json_data=None, headers=None, text=""):
 
 class TestClientInit(unittest.TestCase):
 
-    def test_stores_access_token(self):
+    @patch.object(SurveyMonkeyClient, "make_request")
+    def test_stores_access_token(self, mock_make_request):
         """Client stores the access_token passed at construction."""
         client = SurveyMonkeyClient("my-token")
         self.assertEqual(client.access_token, "my-token")
+        mock_make_request.assert_called_once_with("users/me")
+
+
+class TestClientTokenValidation(unittest.TestCase):
+
+    @patch.object(SurveyMonkeyClient, "make_request")
+    def test_init_calls_users_me_endpoint_for_token_validation(self, mock_make_request):
+        """Client init validates token by calling users/me."""
+        SurveyMonkeyClient("my-token")
+        mock_make_request.assert_called_once_with("users/me")
 
 
 # ---------------------------------------------------------------------------
@@ -154,8 +165,12 @@ class TestMakeRequestRateLimit(unittest.TestCase):
         """make_request calls singer.write_state on each 429 attempt when state is supplied."""
         mock_request.return_value = _make_resp(429)
         state = {"bookmarks": {"surveys": "2024-01-01"}}
+
+        # Avoid constructor token-validation call so this test exercises state-aware retries.
+        client = SurveyMonkeyClient.__new__(SurveyMonkeyClient)
+        client.access_token = "tok"
         with self.assertRaises(SurveyMonkeyRateLimitError):
-            SurveyMonkeyClient("tok").make_request("surveys", state=state)
+            client.make_request("surveys", state=state)
         # write_state is called once per attempt before raising (backoff retries max_tries=5)
         mock_write_state.assert_called_with(state)
         self.assertGreaterEqual(mock_write_state.call_count, 1)

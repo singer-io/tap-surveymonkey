@@ -9,6 +9,7 @@ from tap_surveymonkey.streams import (
     find_max_timestamp,
     patch_time_str,
     SurveyStream,
+    Surveys,
     PaginatedStream,
     Responses,
     Stream,
@@ -201,6 +202,12 @@ class TestPaginatedStreamFetchData(unittest.TestCase):
 
 class TestStreamFetchData(unittest.TestCase):
 
+    def test_format_response_returns_input(self):
+        """Base Stream.format_response returns the original response unchanged."""
+        stream = Stream(stream_id="survey_details", path="surveys/123/details")
+        payload = {"id": "123", "title": "Survey"}
+        self.assertIs(stream.format_response(payload), payload)
+
     def test_raises_exception_when_response_is_none(self):
         """Stream.fetch_data raises an exception when the client returns None (404)."""
         stream = Stream(stream_id="survey_details", path="surveys/123/details")
@@ -301,3 +308,30 @@ class TestResponsesGetParams(unittest.TestCase):
             None
         )
         self.assertEqual(params["start_modified_at"], "2020-01-01T00:00:00Z")
+
+
+class TestSurveysGetParams(unittest.TestCase):
+
+    def test_selected_optional_fields_are_added_to_include(self):
+        """Surveys.get_params appends selected optional metadata fields to include."""
+        stream = Surveys(stream_id="surveys", path="surveys")
+        mock_catalog_stream = MagicMock()
+        mock_catalog_stream.metadata = [
+            {
+                "breadcrumb": (),
+                "metadata": {},
+            },
+            {
+                "breadcrumb": ("properties", "language"),
+                "metadata": {"selected": True},
+            },
+        ]
+
+        params = stream.get_params(
+            mock_catalog_stream,
+            {"start_date": "2020-01-01T00:00:00Z"},
+            {},
+            None,
+        )
+
+        self.assertIn("language", params["include"].split(","))

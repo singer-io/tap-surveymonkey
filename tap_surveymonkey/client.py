@@ -89,6 +89,12 @@ def _on_backoff(details):
 class SurveyMonkeyClient:
     def __init__(self, access_token):
         self.access_token = access_token
+        self.validate_token()
+
+    def validate_token(self):
+        """Validate the access token by making a test request to the API."""
+        self.make_request("users/me")
+
 
     @backoff.on_exception(
         backoff.constant,
